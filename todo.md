@@ -52,3 +52,9 @@
 - [x] Write vitest tests for core procedures
 - [x] Final mobile responsiveness polish
 - [x] SEO meta tags on all pages
+
+## Phase 9: Product Catalogue Import
+- [x] Import 506 products from WooCommerce CSV export
+- [x] Parse and normalize product data (prices, categories, brands)
+- [x] Create 76 categories and 59 brands from product data
+- [x] Verify all products are searchable and filterable
