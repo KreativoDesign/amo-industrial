@@ -122,6 +122,8 @@ export async function getProducts(opts: {
   if (opts.published !== undefined) conditions.push(eq(products.published, opts.published));
   if (opts.featured !== undefined) conditions.push(eq(products.featured, opts.featured));
   if (opts.inStock !== undefined) conditions.push(eq(products.inStock, opts.inStock));
+  // Always filter out products without images
+  conditions.push(sql`imageUrl IS NOT NULL AND imageUrl != ''`);
 
   if (opts.categoryId) {
     conditions.push(eq(products.categoryId, opts.categoryId));
@@ -156,7 +158,7 @@ export async function getProducts(opts: {
 export async function getProductBySlug(slug: string) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db.select().from(products).where(eq(products.slug, slug)).limit(1);
+  const result = await db.select().from(products).where(and(eq(products.slug, slug), sql`imageUrl IS NOT NULL AND imageUrl != ''`)).limit(1);
   return result[0] ?? null;
 }
 

@@ -71,3 +71,9 @@
 - [x] Generated professional placeholder images for all 200 products
 - [x] Uploaded placeholders to S3 storage
 - [x] Updated database — 100% of products now have images (506/506)
+
+## Phase 12: Frontend Image Filtering
+- [x] Updated getProducts() to filter out products without images
+- [x] Updated getProductBySlug() to filter out products without images
+- [x] All product queries now exclude products with null/empty imageUrl
+- [x] Tests pass (7/7)
