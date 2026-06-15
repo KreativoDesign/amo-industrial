@@ -327,23 +327,27 @@ function ProductFormModal({ product, categories, brands, onClose, onSuccess }: a
   const uploadImage = trpc.admin.uploadProductImage.useMutation();
 
   const handleImageUpload = async (file: File) => {
-    if (!product?.id) {
-      alert("Save the product first before uploading an image");
-      return;
-    }
-    
     setUploading(true);
     try {
       const reader = new FileReader();
       reader.onload = async (e) => {
         const base64 = (e.target?.result as string).split(',')[1];
-        const result = await uploadImage.mutateAsync({
-          productId: product.id,
-          imageBase64: base64,
-          filename: file.name,
-        });
-        setImagePreview(result.imageUrl);
-        setForm(f => ({ ...f, imageUrl: result.imageUrl }));
+        
+        // If editing existing product, upload to storage
+        if (product?.id) {
+          const result = await uploadImage.mutateAsync({
+            productId: product.id,
+            imageBase64: base64,
+            filename: file.name,
+          });
+          setImagePreview(result.imageUrl);
+          setForm(f => ({ ...f, imageUrl: result.imageUrl }));
+        } else {
+          // For new products, store as data URL for preview until saved
+          const dataUrl = e.target?.result as string;
+          setImagePreview(dataUrl);
+          setForm(f => ({ ...f, imageUrl: dataUrl }));
+        }
         setUploading(false);
       };
       reader.readAsDataURL(file);
@@ -375,11 +379,28 @@ function ProductFormModal({ product, categories, brands, onClose, onSuccess }: a
       categoryId: form.categoryId ? parseInt(form.categoryId) : undefined,
       brandId: form.brandId ? parseInt(form.brandId) : undefined,
       price: form.price || undefined,
+      imageUrl: imagePreview.startsWith('data:') ? undefined : form.imageUrl,
     };
     if (product) {
       updateProduct.mutate({ id: product.id, ...data });
     } else {
-      createProduct.mutate(data);
+      createProduct.mutate(data, {
+        onSuccess: async (newProduct: any) => {
+          if (imagePreview.startsWith('data:')) {
+            try {
+              const base64 = imagePreview.split(',')[1];
+              await uploadImage.mutateAsync({
+                productId: newProduct.id,
+                imageBase64: base64,
+                filename: 'product-image.jpg',
+              });
+            } catch (error) {
+              console.warn('Image upload failed:', error);
+            }
+          }
+          onSuccess();
+        },
+      });
     }
   };
 

@@ -91,3 +91,11 @@
 - [x] Wire file upload to storage service
 - [x] Add change image functionality
 - [x] All tests pass (7/7)
+
+
+## Phase 15: Manual Product Creation
+- [x] Updated ProductFormModal to allow image upload for new products
+- [x] New products can now be created with image preview before saving
+- [x] Image is automatically uploaded to S3 after product creation
+- [x] Admins can add products with all fields: name, SKU, category, brand, price, description, image
+- [x] All tests pass (7/7)
