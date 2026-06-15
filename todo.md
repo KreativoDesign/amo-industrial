@@ -82,3 +82,12 @@
 - [x] Identified broken image URLs with "Storage Path: " prefix
 - [x] Fixed all image URLs by removing prefix (200 products)
 - [x] Verified all images now load correctly
+
+
+## Phase 14: Admin Image Upload Tool
+- [x] Add uploadProductImage tRPC procedure to backend
+- [x] Implement drag-and-drop image uploader in ProductFormModal
+- [x] Add image preview functionality
+- [x] Wire file upload to storage service
+- [x] Add change image functionality
+- [x] All tests pass (7/7)

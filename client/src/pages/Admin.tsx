@@ -319,9 +319,54 @@ function ProductFormModal({ product, categories, brands, onClose, onSuccess }: a
     published: product?.published ?? true,
     featured: product?.featured ?? false,
   });
+  const [imagePreview, setImagePreview] = useState(product?.imageUrl || "");
+  const [uploading, setUploading] = useState(false);
 
   const createProduct = trpc.admin.createProduct.useMutation({ onSuccess });
   const updateProduct = trpc.admin.updateProduct.useMutation({ onSuccess });
+  const uploadImage = trpc.admin.uploadProductImage.useMutation();
+
+  const handleImageUpload = async (file: File) => {
+    if (!product?.id) {
+      alert("Save the product first before uploading an image");
+      return;
+    }
+    
+    setUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = (e.target?.result as string).split(',')[1];
+        const result = await uploadImage.mutateAsync({
+          productId: product.id,
+          imageBase64: base64,
+          filename: file.name,
+        });
+        setImagePreview(result.imageUrl);
+        setForm(f => ({ ...f, imageUrl: result.imageUrl }));
+        setUploading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload image');
+      setUploading(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleImageUpload(files[0]);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -384,11 +429,52 @@ function ProductFormModal({ product, categories, brands, onClose, onSuccess }: a
               <input type="number" step="0.01" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
                 className="w-full px-3 py-2.5 border border-border text-sm focus:outline-none focus:border-charcoal" />
             </div>
-            <div>
-              <label className="block text-xs font-700 text-charcoal uppercase tracking-wide mb-1">Image URL</label>
+            <div className="col-span-2">
+              <label className="block text-xs font-700 text-charcoal uppercase tracking-wide mb-1">Product Image</label>
+              <div
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                className="border-2 border-dashed border-border rounded p-4 text-center cursor-pointer hover:border-charcoal transition-colors"
+              >
+                {imagePreview ? (
+                  <div className="flex items-center gap-4">
+                    <img src={imagePreview} alt="Preview" className="w-20 h-20 object-cover rounded" />
+                    <div className="flex-1 text-left">
+                      <p className="text-sm font-600 text-charcoal mb-2">Image uploaded</p>
+                      <label className="text-xs text-amo-red cursor-pointer hover:underline">
+                        Change image
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={e => e.target.files?.[0] && handleImageUpload(e.target.files[0])}
+                          className="hidden"
+                          disabled={uploading}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="block cursor-pointer">
+                    <div className="text-center py-8">
+                      <div className="text-4xl mb-2">📁</div>
+                      <p className="text-sm font-600 text-charcoal mb-1">Drag and drop image here</p>
+                      <p className="text-xs text-dark-grey mb-3">or click to select</p>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={e => e.target.files?.[0] && handleImageUpload(e.target.files[0])}
+                        className="hidden"
+                        disabled={uploading}
+                      />
+                    </div>
+                  </label>
+                )}
+                {uploading && <p className="text-xs text-dark-grey mt-2">Uploading...</p>}
+              </div>
+              <p className="text-xs text-dark-grey mt-2">Or paste image URL directly:</p>
               <input value={form.imageUrl} onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))}
                 placeholder="https://..."
-                className="w-full px-3 py-2.5 border border-border text-sm focus:outline-none focus:border-charcoal" />
+                className="w-full px-3 py-2.5 border border-border text-sm focus:outline-none focus:border-charcoal mt-1" />
             </div>
             <div className="col-span-2">
               <label className="block text-xs font-700 text-charcoal uppercase tracking-wide mb-1">Short Description</label>

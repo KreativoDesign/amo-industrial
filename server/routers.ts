@@ -4,6 +4,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { storagePut } from "./storage";
 import { notifyOwner } from "./_core/notification";
 import {
   getCategories, getCategoryBySlug, createCategory, deleteCategory,
@@ -225,6 +226,31 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await deleteCategory(input.id);
         return { success: true };
+      }),
+
+    uploadProductImage: adminProcedure
+      .input(z.object({
+        productId: z.number(),
+        imageBase64: z.string(),
+        filename: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          // Convert base64 to buffer
+          const buffer = Buffer.from(input.imageBase64, 'base64');
+          
+          // Upload to storage
+          const storageKey = `products/${input.productId}/${Date.now()}-${input.filename}`;
+          const { url } = await storagePut(storageKey, buffer, 'image/jpeg');
+          
+          // Update product with new image URL
+          await updateProduct(input.productId, { imageUrl: url });
+          
+          return { success: true, imageUrl: url };
+        } catch (error) {
+          console.error('Image upload error:', error);
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to upload image' });
+        }
       }),
 
     importCsv: adminProcedure
