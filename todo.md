@@ -108,3 +108,11 @@
 - [x] Auto-fill form fields with scraped data
 - [x] Support for relative and absolute image URLs
 - [x] All tests pass (7/7)
+
+
+## Phase 17: Admin Panel Navigation Link
+- [x] Add Settings icon import from lucide-react
+- [x] Add useAuth hook to Header component
+- [x] Add conditional Admin link in desktop navigation (only visible to admin users)
+- [x] Style Admin link in red to match branding
+- [x] All tests pass (7/7)

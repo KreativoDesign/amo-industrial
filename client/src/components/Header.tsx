@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, ShoppingCart, Phone, Mail, ChevronDown, Package } from "lucide-react";
+import { Menu, X, ShoppingCart, Phone, Mail, ChevronDown, Package, Settings } from "lucide-react";
 import { useQuote } from "@/contexts/QuoteContext";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 const CATEGORIES = [
   { name: "Accessories", slug: "accessories", icon: "🔧" },
@@ -24,6 +25,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const { count, openDrawer } = useQuote();
   const [location] = useLocation();
+  const { user } = useAuth();
   const megaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -133,6 +135,12 @@ export default function Header() {
             <Link href="/contact" className="px-4 py-2 font-display font-700 text-sm uppercase tracking-wide text-charcoal hover:text-amo-red transition-colors">
               Contact
             </Link>
+            {user?.role === "admin" && (
+              <Link href="/admin" className="px-4 py-2 font-display font-700 text-sm uppercase tracking-wide text-amo-red hover:text-amo-red-dark transition-colors flex items-center gap-1.5">
+                <Settings size={14} />
+                Admin
+              </Link>
+            )}
           </nav>
 
           {/* Right Actions */}
