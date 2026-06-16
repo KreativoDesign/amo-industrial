@@ -198,6 +198,12 @@ export default function Header() {
               <Link href="/contact" className="py-2.5 font-display font-700 text-sm uppercase tracking-wide text-charcoal hover:text-amo-red transition-colors">
                 Contact
               </Link>
+              {user?.role === "admin" && (
+                <Link href="/admin" className="py-2.5 font-display font-700 text-sm uppercase tracking-wide text-amo-red hover:text-amo-red-dark transition-colors flex items-center gap-1.5">
+                  <Settings size={14} />
+                  Admin Panel
+                </Link>
+              )}
               <div className="mt-3 pt-3 border-t border-border flex flex-col gap-2 text-sm text-dark-grey">
                 <a href="tel:+27828952245" className="flex items-center gap-2 hover:text-amo-red transition-colors">
                   <Phone size={14} /> +27 82 895 2245

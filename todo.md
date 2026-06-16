@@ -116,3 +116,10 @@
 - [x] Add conditional Admin link in desktop navigation (only visible to admin users)
 - [x] Style Admin link in red to match branding
 - [x] All tests pass (7/7)
+
+
+## Phase 18: Mobile Admin Menu
+- [x] Add Admin Panel link to mobile navigation menu
+- [x] Show Admin link only for logged-in admin users
+- [x] Style with red color and settings icon for consistency
+- [x] All tests pass (7/7)
