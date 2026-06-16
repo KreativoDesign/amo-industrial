@@ -253,6 +253,42 @@ export const appRouter = router({
         }
       }),
 
+    scrapeProductUrl: adminProcedure
+      .input(z.object({ url: z.string().url() }))
+      .mutation(async ({ input }) => {
+        try {
+          const response = await fetch(input.url, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+          });
+          const html = await response.text();
+          
+          // Extract title/name
+          const titleMatch = html.match(/<title>([^<]+)<\/title>/) || html.match(/<h1[^>]*>([^<]+)<\/h1>/);
+          const name = titleMatch?.[1]?.trim() || '';
+          
+          // Extract description
+          const descMatch = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/) ||
+                           html.match(/<p[^>]*>([^<]{50,})<\/p>/);
+          const description = descMatch?.[1]?.trim() || '';
+          
+          // Extract image URL
+          let imageUrl = '';
+          const imgMatches = html.match(/<img[^>]+src=["']([^"']+)["']/gi) || [];
+          for (const match of imgMatches) {
+            const src = match.match(/src=["']([^"']+)["']/)?.[1];
+            if (src && !src.includes('logo') && !src.includes('icon')) {
+              imageUrl = src.startsWith('http') ? src : new URL(src, input.url).href;
+              break;
+            }
+          }
+          
+          return { name, description, imageUrl };
+        } catch (error) {
+          console.error('Scrape error:', error);
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to scrape URL' });
+        }
+      }),
+
     importCsv: adminProcedure
       .input(z.object({ csvContent: z.string() }))
       .mutation(async ({ input }) => {

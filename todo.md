@@ -99,3 +99,12 @@
 - [x] Image is automatically uploaded to S3 after product creation
 - [x] Admins can add products with all fields: name, SKU, category, brand, price, description, image
 - [x] All tests pass (7/7)
+
+
+## Phase 16: Product Import from URL
+- [x] Add scrapeProductUrl tRPC procedure to backend
+- [x] Implement HTML scraping for product name, description, and images
+- [x] Add URL scraper UI to ProductFormModal (only for new products)
+- [x] Auto-fill form fields with scraped data
+- [x] Support for relative and absolute image URLs
+- [x] All tests pass (7/7)

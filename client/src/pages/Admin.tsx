@@ -321,10 +321,13 @@ function ProductFormModal({ product, categories, brands, onClose, onSuccess }: a
   });
   const [imagePreview, setImagePreview] = useState(product?.imageUrl || "");
   const [uploading, setUploading] = useState(false);
+  const [scrapeUrl, setScrapeUrl] = useState("");
+  const [scraping, setScraping] = useState(false);
 
   const createProduct = trpc.admin.createProduct.useMutation({ onSuccess });
   const updateProduct = trpc.admin.updateProduct.useMutation({ onSuccess });
   const uploadImage = trpc.admin.uploadProductImage.useMutation();
+  const scrapeProductUrl = trpc.admin.scrapeProductUrl.useMutation();
 
   const handleImageUpload = async (file: File) => {
     setUploading(true);
@@ -372,6 +375,31 @@ function ProductFormModal({ product, categories, brands, onClose, onSuccess }: a
     }
   };
 
+  const handleScrapeUrl = async () => {
+    if (!scrapeUrl.trim()) {
+      alert("Please enter a URL");
+      return;
+    }
+    setScraping(true);
+    try {
+      const result = await scrapeProductUrl.mutateAsync({ url: scrapeUrl });
+      setForm(f => ({
+        ...f,
+        name: result.name || f.name,
+        description: result.description || f.description,
+      }));
+      if (result.imageUrl) {
+        setImagePreview(result.imageUrl);
+        setForm(f => ({ ...f, imageUrl: result.imageUrl }));
+      }
+      setScrapeUrl("");
+    } catch (error) {
+      alert("Failed to scrape URL. Please enter product details manually.");
+    } finally {
+      setScraping(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const data = {
@@ -412,6 +440,21 @@ function ProductFormModal({ product, categories, brands, onClose, onSuccess }: a
           <button onClick={onClose}><X size={20} /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {!product && (
+            <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
+              <label className="block text-xs font-700 text-charcoal uppercase tracking-wide mb-2">Import from URL (Optional)</label>
+              <div className="flex gap-2">
+                <input type="url" placeholder="Paste supplier product URL..." value={scrapeUrl}
+                  onChange={e => setScrapeUrl(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-border text-sm focus:outline-none focus:border-charcoal" />
+                <button type="button" onClick={handleScrapeUrl} disabled={scraping}
+                  className="px-4 py-2 bg-blue-600 text-white text-sm font-600 hover:bg-blue-700 disabled:opacity-50">
+                  {scraping ? "Scraping..." : "Scrape"}
+                </button>
+              </div>
+              <p className="text-xs text-gray-600 mt-2">Paste a product URL to auto-fill name, description, and image</p>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <label className="block text-xs font-700 text-charcoal uppercase tracking-wide mb-1">Product Name *</label>
