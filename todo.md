@@ -123,3 +123,12 @@
 - [x] Show Admin link only for logged-in admin users
 - [x] Style with red color and settings icon for consistency
 - [x] All tests pass (7/7)
+
+
+## Phase 19: Frontend Login/Logout Button
+- [x] Add Login button to desktop navigation (visible when not logged in)
+- [x] Add Logout button to desktop navigation (visible when logged in)
+- [x] Add Login button to mobile navigation (visible when not logged in)
+- [x] Add Logout button to mobile navigation (visible when logged in)
+- [x] Style buttons consistently with AMO branding
+- [x] All tests pass (7/7)
