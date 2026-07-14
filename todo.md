@@ -134,7 +134,7 @@
 - [x] All tests pass (7/7)
 
 
-## Phase 20: WordPress Image Scraping & Bulk Import
+## Phase 20: WordPress Image Scraping & Bulk Import ✅ COMPLETE
 - [x] Scrape 440 product images from WordPress shop
 - [x] Create importBulkUrls tRPC procedure for bulk image matching
 - [x] Implement product name matching algorithm (60% similarity threshold)
@@ -142,11 +142,18 @@
 - [x] Display import results (matched, updated, unmatched products)
 - [x] Add wordpress_products.json to public folder
 - [x] Write and pass 4 vitest tests for matching logic
+- [x] Run bulk import: 356 products matched, 42 updated with real images
 
-## Phase 21: Frontend Login/Logout Navigation
+## Phase 21: Frontend Login/Logout Navigation ✅ COMPLETE
 - [x] Add Login button to desktop navigation (visible when not logged in)
 - [x] Add Logout button to desktop navigation (visible when logged in)
 - [x] Add Login button to mobile navigation (visible when not logged in)
 - [x] Add Logout button to mobile navigation (visible when logged in)
 - [x] Display user name next to logout button on desktop
 - [x] All 11 vitest tests pass
+
+## Phase 22: Admin Role Assignment & Import Execution
+- [x] Promote user to admin role in database
+- [x] Create Node.js import script for bulk WordPress image import
+- [x] Execute bulk import: 356 matched, 42 updated, 84 unmatched
+- [x] Fix mobile admin panel responsiveness issue
