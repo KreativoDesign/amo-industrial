@@ -703,6 +703,8 @@ function ImportTab() {
   const [result, setResult] = useState<any>(null);
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState("");
+  const [bulkUrlResult, setBulkUrlResult] = useState<any>(null);
+  const [bulkImporting, setBulkImporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const importCsv = trpc.admin.importCsv.useMutation({
@@ -737,8 +739,94 @@ function ImportTab() {
     importCsv.mutate({ csvContent: text });
   };
 
+  const importBulkUrls = trpc.admin.importBulkUrls.useMutation({
+    onSuccess: (data) => {
+      setBulkUrlResult(data);
+      setBulkImporting(false);
+    },
+    onError: (err) => {
+      setError(err.message);
+      setBulkImporting(false);
+    },
+  });
+
+  const handleBulkUrlImport = async () => {
+    setBulkImporting(true);
+    setError("");
+    try {
+      const response = await fetch('/wordpress_products.json');
+      if (!response.ok) throw new Error('Failed to load WordPress products');
+      const products = await response.json();
+      importBulkUrls.mutate({ products });
+    } catch (err: any) {
+      setError(err.message);
+      setBulkImporting(false);
+    }
+  };
+
   return (
     <div>
+      <h1 className="font-display font-800 text-charcoal text-3xl uppercase tracking-tight mb-2">Product Import</h1>
+      <p className="text-dark-grey text-sm mb-8">
+        Import products in bulk from CSV files or WordPress URLs.
+      </p>
+
+      {/* Bulk URL Import Section */}
+      <div className="bg-white border border-border p-6 mb-6">
+        <h2 className="font-display font-700 text-charcoal text-lg uppercase tracking-tight mb-2">Bulk WordPress Image Import</h2>
+        <p className="text-dark-grey text-sm mb-4">Import 440+ product images from WordPress shop and match them to existing products.</p>
+        <button
+          onClick={handleBulkUrlImport}
+          disabled={bulkImporting}
+          className="btn-primary"
+        >
+          {bulkImporting ? (
+            <span className="flex items-center gap-2">
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Importing...
+            </span>
+          ) : (
+            <><Upload size={16} /> Import WordPress Images</>
+          )}
+        </button>
+      </div>
+
+      {/* Bulk URL Results */}
+      {bulkUrlResult && (
+        <div className="bg-white border border-border p-6 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <CheckCircle size={18} className="text-green-600" />
+            <h2 className="font-display font-700 text-charcoal text-lg uppercase tracking-tight">WordPress Import Complete</h2>
+          </div>
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="bg-green-50 p-4 text-center">
+              <div className="font-display font-800 text-green-700 text-3xl">{bulkUrlResult.matched}</div>
+              <div className="text-green-600 text-sm font-600">Matched</div>
+            </div>
+            <div className="bg-blue-50 p-4 text-center">
+              <div className="font-display font-800 text-blue-700 text-3xl">{bulkUrlResult.updated}</div>
+              <div className="text-blue-600 text-sm font-600">Updated</div>
+            </div>
+            <div className="bg-amber-50 p-4 text-center">
+              <div className="font-display font-800 text-amber-700 text-3xl">{bulkUrlResult.skipped}</div>
+              <div className="text-amber-600 text-sm font-600">Unmatched</div>
+            </div>
+          </div>
+          {bulkUrlResult.unmatched && bulkUrlResult.unmatched.length > 0 && (
+            <div>
+              <div className="font-700 text-charcoal text-sm mb-2">Unmatched Products (first 10):</div>
+              <div className="max-h-40 overflow-y-auto space-y-1">
+                {bulkUrlResult.unmatched.map((name: string, i: number) => (
+                  <div key={i} className="text-xs text-dark-grey bg-off-white px-3 py-1.5">{name}</div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <hr className="my-8" />
+
       <h1 className="font-display font-800 text-charcoal text-3xl uppercase tracking-tight mb-2">CSV Product Import</h1>
       <p className="text-dark-grey text-sm mb-8">
         Import products in bulk from a CSV file. The system will create or update products based on SKU.

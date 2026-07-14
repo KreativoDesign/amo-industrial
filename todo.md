@@ -132,3 +132,13 @@
 - [x] Add Logout button to mobile navigation (visible when logged in)
 - [x] Style buttons consistently with AMO branding
 - [x] All tests pass (7/7)
+
+
+## Phase 20: WordPress Image Scraping & Bulk Import
+- [x] Scrape 440 product images from WordPress shop
+- [x] Create importBulkUrls tRPC procedure for bulk image matching
+- [x] Implement product name matching algorithm (60% similarity threshold)
+- [x] Add Bulk WordPress Image Import UI to admin dashboard
+- [x] Display import results (matched, updated, unmatched products)
+- [x] Add wordpress_products.json to public folder
+- [x] Write and pass 4 vitest tests for matching logic

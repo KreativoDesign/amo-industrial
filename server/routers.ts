@@ -289,6 +289,74 @@ export const appRouter = router({
         }
       }),
 
+    importBulkUrls: adminProcedure
+      .input(z.object({
+        products: z.array(z.object({
+          name: z.string(),
+          imageUrl: z.string(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        let matched = 0, updated = 0, skipped = 0;
+        const errors: string[] = [];
+        const unmatched: string[] = [];
+
+        // Get all existing products
+        const existingProducts = await getProducts({ limit: 10000 });
+
+        for (const wpProduct of input.products) {
+          try {
+            // Normalize names for matching
+            const normalizeForMatch = (name: string) => {
+              return name.toLowerCase()
+                .replace(/[^a-z0-9\s]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+            };
+
+            const wpNorm = normalizeForMatch(wpProduct.name);
+            let bestMatch = null;
+            let bestScore = 0;
+
+            // Find best matching product
+            for (const dbProduct of existingProducts) {
+              const dbNorm = normalizeForMatch(dbProduct.name);
+              
+              // Simple similarity check
+              let matches = 0;
+              const wpWords = wpNorm.split(' ');
+              const dbWords = dbNorm.split(' ');
+              
+              for (const word of wpWords) {
+                if (word.length > 2 && dbNorm.includes(word)) matches++;
+              }
+              
+              const score = matches / Math.max(wpWords.length, 1);
+              
+              if (score > bestScore) {
+                bestScore = score;
+                bestMatch = dbProduct;
+              }
+            }
+
+            // Update if match found with high confidence (>60%)
+            if (bestMatch && bestScore >= 0.6) {
+              await updateProduct(bestMatch.id, { imageUrl: wpProduct.imageUrl });
+              updated++;
+              matched++;
+            } else {
+              unmatched.push(wpProduct.name);
+              skipped++;
+            }
+          } catch (e: any) {
+            errors.push(`${wpProduct.name}: ${e.message}`);
+            skipped++;
+          }
+        }
+
+        return { matched, updated, skipped, errors, unmatched: unmatched.slice(0, 10), total: input.products.length };
+      }),
+
     importCsv: adminProcedure
       .input(z.object({ csvContent: z.string() }))
       .mutation(async ({ input }) => {
