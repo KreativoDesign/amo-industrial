@@ -142,3 +142,11 @@
 - [x] Display import results (matched, updated, unmatched products)
 - [x] Add wordpress_products.json to public folder
 - [x] Write and pass 4 vitest tests for matching logic
+
+## Phase 21: Frontend Login/Logout Navigation
+- [x] Add Login button to desktop navigation (visible when not logged in)
+- [x] Add Logout button to desktop navigation (visible when logged in)
+- [x] Add Login button to mobile navigation (visible when not logged in)
+- [x] Add Logout button to mobile navigation (visible when logged in)
+- [x] Display user name next to logout button on desktop
+- [x] All 11 vitest tests pass

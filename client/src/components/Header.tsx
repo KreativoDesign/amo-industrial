@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, ShoppingCart, Phone, Mail, ChevronDown, Package, Settings } from "lucide-react";
+import { Menu, X, ShoppingCart, Phone, Mail, ChevronDown, Package, Settings, LogOut } from "lucide-react";
 import { useQuote } from "@/contexts/QuoteContext";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
 
 const CATEGORIES = [
   { name: "Accessories", slug: "accessories", icon: "🔧" },
@@ -25,7 +26,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const { count, openDrawer } = useQuote();
   const [location] = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const megaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -143,6 +144,29 @@ export default function Header() {
             )}
           </nav>
 
+          {/* Auth Links - Desktop */}
+          <div className="hidden lg:flex items-center gap-2">
+            {user ? (
+              <>
+                <span className="text-xs text-dark-grey px-3 py-2">{user.name || user.email}</span>
+                <button
+                  onClick={() => logout()}
+                  className="flex items-center gap-1.5 px-4 py-2 font-display font-700 text-sm uppercase tracking-wide text-charcoal border border-charcoal hover:bg-charcoal hover:text-white transition-colors"
+                >
+                  <LogOut size={14} />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <a
+                href={getLoginUrl()}
+                className="flex items-center gap-1.5 px-4 py-2 font-display font-700 text-sm uppercase tracking-wide text-charcoal hover:text-amo-red transition-colors"
+              >
+                Login
+              </a>
+            )}
+          </div>
+
           {/* Right Actions */}
           <div className="flex items-center gap-3">
             {/* Quote Button */}
@@ -203,6 +227,22 @@ export default function Header() {
                   <Settings size={14} />
                   Admin Panel
                 </Link>
+              )}
+              {user ? (
+                <button
+                  onClick={() => logout()}
+                  className="py-2.5 font-display font-700 text-sm uppercase tracking-wide text-charcoal hover:text-amo-red transition-colors flex items-center gap-1.5 w-full"
+                >
+                  <LogOut size={14} />
+                  Logout
+                </button>
+              ) : (
+                <a
+                  href={getLoginUrl()}
+                  className="py-2.5 font-display font-700 text-sm uppercase tracking-wide text-charcoal hover:text-amo-red transition-colors flex items-center gap-1.5"
+                >
+                  Login
+                </a>
               )}
               <div className="mt-3 pt-3 border-t border-border flex flex-col gap-2 text-sm text-dark-grey">
                 <a href="tel:+27828952245" className="flex items-center gap-2 hover:text-amo-red transition-colors">
