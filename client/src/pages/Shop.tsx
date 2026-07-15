@@ -43,7 +43,8 @@ export default function Shop({ categorySlug }: { categorySlug?: string }) {
 
   const sortedProducts = useMemo(() => {
     if (!products) return [];
-    const arr = [...products];
+    // Filter out products without images
+    const arr = products.filter(p => p.imageUrl && p.imageUrl.trim() !== '');
     if (sortBy === "name") arr.sort((a, b) => a.name.localeCompare(b.name));
     else if (sortBy === "name-desc") arr.sort((a, b) => b.name.localeCompare(a.name));
     else if (sortBy === "newest") arr.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

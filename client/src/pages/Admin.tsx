@@ -468,7 +468,9 @@ function QuotesTab() {
 function ImportTab() {
   const [importUrl, setImportUrl] = useState("");
   const [importResults, setImportResults] = useState<any>(null);
+  const [replicateResults, setReplicateResults] = useState<any>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [isReplicating, setIsReplicating] = useState(false);
 
   const importBulkUrls = trpc.admin.importBulkUrls.useMutation({
     onSuccess: (data) => {
@@ -481,9 +483,26 @@ function ImportTab() {
     },
   });
 
+  const replicateImages = trpc.admin.replicateProductImages.useMutation({
+    onSuccess: (data) => {
+      setReplicateResults(data);
+      setIsReplicating(false);
+      alert(`Successfully replicated images to ${data.replicated} products!`);
+    },
+    onError: (error) => {
+      alert("Replication failed: " + error.message);
+      setIsReplicating(false);
+    },
+  });
+
   const handleImport = async () => {
     setIsImporting(true);
     importBulkUrls.mutate({ products: [] });
+  };
+
+  const handleReplicate = async () => {
+    setIsReplicating(true);
+    replicateImages.mutate({});
   };
 
   return (
@@ -511,6 +530,23 @@ function ImportTab() {
           </div>
         </div>
 
+        {/* Replicate Images */}
+        <div className="bg-white border border-border p-6">
+          <h2 className="font-display font-700 text-charcoal text-lg uppercase tracking-tight mb-4">Replicate Images</h2>
+          <div className="space-y-4">
+            <div className="p-4 bg-off-white rounded text-sm text-dark-grey">
+              Automatically copy images from one product variant to all matching variants (e.g., Drillbits 3mm → Drillbits 5mm)
+            </div>
+            <button
+              onClick={handleReplicate}
+              disabled={isReplicating}
+              className="btn-primary w-full"
+            >
+              {isReplicating ? "Replicating..." : "Replicate Images Across Variants"}
+            </button>
+          </div>
+        </div>
+
         {/* Import Results */}
         {importResults && (
           <div className="bg-white border border-border p-6">
@@ -519,6 +555,29 @@ function ImportTab() {
               <div><span className="font-600">Matched:</span> {importResults.matched}</div>
               <div><span className="font-600">Updated:</span> {importResults.updated}</div>
               <div><span className="font-600">Unmatched:</span> {importResults.unmatched}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Replicate Results */}
+        {replicateResults && (
+          <div className="bg-white border border-border p-6">
+            <h2 className="font-display font-700 text-charcoal text-lg uppercase tracking-tight mb-4">Replication Results</h2>
+            <div className="space-y-2 text-sm">
+              <div><span className="font-600">Replicated:</span> {replicateResults.replicated} products</div>
+              <div><span className="font-600">Total Processed:</span> {replicateResults.total} products</div>
+              {replicateResults.results && replicateResults.results.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-border">
+                  <div className="font-600 mb-2">Variant Groups Updated:</div>
+                  <div className="space-y-1 max-h-40 overflow-y-auto">
+                    {replicateResults.results.map((result: any, idx: number) => (
+                      <div key={idx} className="text-xs text-dark-grey">
+                        {result.name} ({result.variants} variants)
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

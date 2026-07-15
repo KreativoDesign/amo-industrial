@@ -58,13 +58,13 @@ export default function ProductDetail() {
     );
   }
 
-  if (!product) {
+  if (!product || !product.imageUrl || product.imageUrl.trim() === '') {
     return (
       <SiteLayout>
         <div className="container py-20 text-center">
           <Package size={48} className="text-mid-grey mx-auto mb-4" />
-          <h1 className="font-display font-800 text-charcoal text-3xl uppercase">Product Not Found</h1>
-          <p className="text-dark-grey mt-2 mb-6">This product may have been removed or the URL is incorrect.</p>
+          <h1 className="font-display font-800 text-charcoal text-3xl uppercase">Product Not Available</h1>
+          <p className="text-dark-grey mt-2 mb-6">This product is not currently available. Please check back later or browse our other products.</p>
           <Link href="/shop" className="btn-primary">Browse Products</Link>
         </div>
       </SiteLayout>
@@ -314,7 +314,7 @@ export default function ProductDetail() {
           </div>
 
           {/* Related Products */}
-          {related && related.filter(p => p.id !== product.id).length > 0 && (
+          {related && related.filter(p => p.id !== product.id && p.imageUrl && p.imageUrl.trim() !== '').length > 0 && (
             <div className="mt-14">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-display font-800 text-charcoal text-2xl uppercase tracking-tight">Related Products</h3>
@@ -323,7 +323,7 @@ export default function ProductDetail() {
                 </Link>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {related.filter(p => p.id !== product.id).slice(0, 4).map(p => (
+                {related.filter(p => p.id !== product.id && p.imageUrl && p.imageUrl.trim() !== '').slice(0, 4).map(p => (
                   <RelatedCard key={p.id} product={p} />
                 ))}
               </div>

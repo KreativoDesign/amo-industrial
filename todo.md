@@ -166,3 +166,15 @@
 - [x] Add overlay for mobile sidebar
 - [x] Optimize typography and spacing for mobile
 - [x] All 11 vitest tests pass
+
+
+## Phase 24: Product Image Visibility & Replication ✅ COMPLETE
+- [x] Update product visibility logic to hide products without images
+- [x] Filter out products with placeholder/missing images from shop display
+- [x] Create admin tool to replicate images across product variants
+- [x] Identify products with duplicate names but different sizes
+- [x] Copy images from one variant to all matching variants
+- [x] Update product queries to exclude image-less products
+- [x] Test product display on shop page
+- [x] Add "Replicate Images Across Variants" button to admin dashboard
+- [x] All 11 vitest tests pass

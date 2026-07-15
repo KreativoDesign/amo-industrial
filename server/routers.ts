@@ -357,6 +357,57 @@ export const appRouter = router({
         return { matched, updated, skipped, errors, unmatched: unmatched.slice(0, 10), total: input.products.length };
       }),
 
+    replicateProductImages: adminProcedure
+      .input(z.object({ products: z.array(z.object({ id: z.number(), name: z.string() })).optional() }))
+      .mutation(async ({ input }) => {
+        // Get all products
+        const allProducts = await getProducts({ limit: 10000 });
+        
+        // Group products by normalized name (to find variants)
+        const productsByName = new Map<string, typeof allProducts>();
+        
+        for (const product of allProducts) {
+          // Normalize: remove size indicators like "3mm", "5mm", "100mm", etc.
+          const baseName = product.name
+            .replace(/\s*\d+\s*(mm|cm|m|inch|\")?\s*$/i, '')
+            .trim()
+            .toLowerCase();
+          
+          if (!productsByName.has(baseName)) {
+            productsByName.set(baseName, []);
+          }
+          productsByName.get(baseName)!.push(product);
+        }
+        
+        let replicated = 0;
+        const results: { name: string; imageUrl: string; variants: number }[] = [];
+        
+        // For each group of variants
+        for (const [baseName, variants] of Array.from(productsByName.entries())) {
+          if (variants.length <= 1) continue; // Skip if only one product with this name
+          
+          // Find the first product with an image
+          const sourceProduct = variants.find((p: any) => p.imageUrl && p.imageUrl.trim() !== '');
+          if (!sourceProduct) continue; // Skip if no product has an image
+          
+          // Replicate image to all variants without images
+          for (const variant of variants) {
+            if (!variant.imageUrl || variant.imageUrl.trim() === '') {
+              await updateProduct(variant.id, { imageUrl: sourceProduct.imageUrl || '' });
+              replicated++;
+            }
+          }
+          
+          results.push({
+            name: baseName,
+            imageUrl: sourceProduct.imageUrl || '',
+            variants: variants.length,
+          });
+        }
+        
+        return { replicated, results, total: allProducts.length };
+      }),
+
     importCsv: adminProcedure
       .input(z.object({ csvContent: z.string() }))
       .mutation(async ({ input }) => {
