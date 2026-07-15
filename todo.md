@@ -170,17 +170,17 @@
 
 ## Phase 24: Product Image Visibility & Replication ✅ COMPLETE
 
-## Phase 25: Featured Products Image Filtering ✅ COMPLETE
+## Phase 25: Comprehensive Product Image Filtering ✅ COMPLETE
 - [x] Filter featured products to only show those with real images
 - [x] Remove hardcoded products with placeholder images from homepage
 - [x] Display only products with valid imageUrl on featured section
-- [x] All 11 vitest tests pass
 - [x] Update product visibility logic to hide products without images
 - [x] Filter out products with placeholder/missing images from shop display
 - [x] Create admin tool to replicate images across product variants
 - [x] Identify products with duplicate names but different sizes
 - [x] Copy images from one variant to all matching variants
-- [x] Update product queries to exclude image-less products
-- [x] Test product display on shop page
+- [x] Update backend getProducts query to exclude image-less products site-wide
+- [x] Filter products without images from all website surfaces (shop, featured, related, detail)
 - [x] Add "Replicate Images Across Variants" button to admin dashboard
 - [x] All 11 vitest tests pass
+- [x] Backend filter ensures NO products without images appear anywhere on website
