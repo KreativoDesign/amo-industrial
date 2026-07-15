@@ -1,4 +1,4 @@
-import { eq, like, and, or, isNull, desc, asc, sql } from "drizzle-orm";
+import { eq, like, and, or, isNull, desc, asc, sql, isNotNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, products, categories, brands, quoteRequests, quoteItems } from "../drizzle/schema";
 import { ENV } from "./_core/env";
@@ -123,7 +123,8 @@ export async function getProducts(opts: {
   if (opts.featured !== undefined) conditions.push(eq(products.featured, opts.featured));
   if (opts.inStock !== undefined) conditions.push(eq(products.inStock, opts.inStock));
   // Always filter out products without images
-  conditions.push(sql`imageUrl IS NOT NULL AND imageUrl != ''`);
+  conditions.push(isNotNull(products.imageUrl));
+  conditions.push(sql`${products.imageUrl} != ''`);
 
   if (opts.categoryId) {
     conditions.push(eq(products.categoryId, opts.categoryId));
