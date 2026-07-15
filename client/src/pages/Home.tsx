@@ -186,7 +186,7 @@ export default function Home() {
       </section>
 
       {/* ── Featured Products ─────────────────────────────────────────────── */}
-      {featuredProducts && featuredProducts.length > 0 && (
+      {featuredProducts && featuredProducts.filter(p => p.imageUrl && p.imageUrl.trim() !== '').length > 0 && (
         <section className="bg-white py-20">
           <div className="container">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
@@ -199,7 +199,7 @@ export default function Home() {
               </Link>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {featuredProducts.map(product => (
+              {featuredProducts.filter(p => p.imageUrl && p.imageUrl.trim() !== '').map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

@@ -169,6 +169,12 @@
 
 
 ## Phase 24: Product Image Visibility & Replication ✅ COMPLETE
+
+## Phase 25: Featured Products Image Filtering ✅ COMPLETE
+- [x] Filter featured products to only show those with real images
+- [x] Remove hardcoded products with placeholder images from homepage
+- [x] Display only products with valid imageUrl on featured section
+- [x] All 11 vitest tests pass
 - [x] Update product visibility logic to hide products without images
 - [x] Filter out products with placeholder/missing images from shop display
 - [x] Create admin tool to replicate images across product variants
