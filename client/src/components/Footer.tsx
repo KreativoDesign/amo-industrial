@@ -17,12 +17,12 @@ export default function Footer() {
     <footer className="bg-charcoal text-white">
       {/* CTA Strip */}
       <div className="bg-amo-red py-8">
-        <div className="container flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="container flex flex-col md:flex-row items-center justify-center md:justify-between gap-4 text-center md:text-left">
           <div>
-            <div className="font-display font-800 text-2xl uppercase tracking-tight">Ready to Request a Quote?</div>
+            <div className="font-display font-800 text-xl md:text-2xl uppercase tracking-tight">Ready to Request a Quote?</div>
             <div className="text-white/80 text-sm mt-1">Our team responds within 24 hours on business days.</div>
           </div>
-          <Link href="/request-quote" className="btn-outline-white flex-shrink-0">
+          <Link href="/request-quote" className="btn-outline-white flex-shrink-0 w-full md:w-auto">
             Request a Quote <ArrowRight size={16} />
           </Link>
         </div>
@@ -31,16 +31,10 @@ export default function Footer() {
       {/* Main Footer */}
       <div className="container py-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
         {/* Brand Column */}
-        <div>
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-10 h-10 bg-amo-red flex items-center justify-center">
-              <span className="font-display font-900 text-white text-lg leading-none">AMO</span>
-            </div>
-            <div>
-              <div className="font-display font-800 text-white text-lg leading-none tracking-tight uppercase">AMO Industrial</div>
-              <div className="text-[10px] text-white/50 tracking-widest uppercase">Industrial Supply</div>
-            </div>
-          </div>
+        <div className="flex flex-col items-center md:items-start text-center md:text-left">
+          <Link href="/" className="mb-5 inline-block group">
+            <img src="/manus-storage/AMO-industrial-logo_51cd6bed.png" alt="AMO Industrial" className="h-12 w-auto transition-all duration-300 ease-out group-hover:scale-105 group-hover:drop-shadow-lg" />
+          </Link>
           <p className="text-white/60 text-sm leading-relaxed mb-5">
             Your trusted local Gqeberha partner for specialist industrial and commercial supplies. Quality products, competitive pricing, fast delivery.
           </p>
@@ -52,7 +46,7 @@ export default function Footer() {
         </div>
 
         {/* Categories */}
-        <div>
+        <div className="flex flex-col items-center md:items-start text-center md:text-left">
           <div className="font-display font-700 text-sm uppercase tracking-widest text-white/50 mb-4">Categories</div>
           <ul className="space-y-2">
             {CATEGORIES.map(cat => (
@@ -67,7 +61,7 @@ export default function Footer() {
         </div>
 
         {/* Quick Links */}
-        <div>
+        <div className="flex flex-col items-center md:items-start text-center md:text-left">
           <div className="font-display font-700 text-sm uppercase tracking-widest text-white/50 mb-4">Quick Links</div>
           <ul className="space-y-2">
             {[
@@ -90,7 +84,7 @@ export default function Footer() {
         </div>
 
         {/* Contact */}
-        <div>
+        <div className="flex flex-col items-center md:items-start text-center md:text-left">
           <div className="font-display font-700 text-sm uppercase tracking-widest text-white/50 mb-4">Contact Us</div>
           <ul className="space-y-4">
             <li className="flex items-start gap-3 text-sm text-white/70">
@@ -119,7 +113,7 @@ export default function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-white/10">
-        <div className="container py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/40">
+        <div className="container py-5 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-3 text-xs text-white/40 text-center">
           <span>© {new Date().getFullYear()} AMO Industrial. All rights reserved.</span>
           <span>115D Mount Road, Mount Croix, Gqeberha</span>
         </div>
