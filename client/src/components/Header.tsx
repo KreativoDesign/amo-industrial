@@ -78,8 +78,8 @@ export default function Header() {
       >
         <div className="container flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-            <img src="/manus-storage/AMO-industrial-logo_51cd6bed.png" alt="AMO Industrial" className="h-12 md:h-14 w-auto" />
+          <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
+            <img src="/manus-storage/AMO-industrial-logo_51cd6bed.png" alt="AMO Industrial" className="h-12 md:h-14 w-auto transition-all duration-300 ease-out group-hover:scale-105 group-hover:drop-shadow-lg cursor-pointer" />
           </Link>
 
           {/* Desktop Nav */}
