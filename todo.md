@@ -202,3 +202,12 @@
 - [x] Add variant switching logic with URL navigation
 - [x] Highlight current variant in dropdown
 - [x] All 11 vitest tests pass
+
+## Phase 28: Dynamic Variant Image Updates ✅ COMPLETE
+- [x] Add selectedVariantId state to ProductDetail component
+- [x] Implement dynamic variant data fetching without page navigation
+- [x] Update product image, name, SKU, and details on variant selection
+- [x] Reset image gallery to first image when variant is selected
+- [x] Update "Add to Quote" button to use selected variant data
+- [x] Smooth transitions between variant displays
+- [x] All 11 vitest tests pass

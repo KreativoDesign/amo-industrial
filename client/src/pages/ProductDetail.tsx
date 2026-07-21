@@ -14,6 +14,7 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [showVariants, setShowVariants] = useState(false);
+  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
   const { addItem, hasItem, updateQuantity, items } = useQuote();
 
   const { data: product, isLoading } = trpc.products.getBySlug.useQuery({ slug });
@@ -21,26 +22,32 @@ export default function ProductDetail() {
     { productId: product?.id ?? 0 },
     { enabled: !!product?.id }
   );
+  const { data: selectedVariant } = trpc.products.getBySlug.useQuery(
+    { slug: selectedVariantId ? variants?.find(v => v.id === selectedVariantId)?.slug ?? '' : '' },
+    { enabled: !!selectedVariantId && !!variants }
+  );
   const { data: related } = trpc.products.list.useQuery(
     { categoryId: product?.categoryId ?? undefined, limit: 4, published: true },
     { enabled: !!product?.categoryId }
   );
 
-  const added = product ? hasItem(product.id) : false;
-  const quoteItem = product ? items.find(i => i.productId === product.id) : null;
+  // Use selected variant data if available, otherwise use main product
+  const displayProduct = selectedVariant ?? product;
+  const added = displayProduct ? hasItem(displayProduct.id) : false;
+  const quoteItem = displayProduct ? items.find(i => i.productId === displayProduct.id) : null;
 
   const handleAddToQuote = () => {
-    if (!product) return;
+    if (!displayProduct) return;
     if (added) {
-      updateQuantity(product.id, qty);
+      updateQuantity(displayProduct.id, qty);
     } else {
       for (let i = 0; i < qty; i++) {
         addItem({
-          productId: product.id,
-          productName: product.name,
-          productSku: product.sku ?? undefined,
-          imageUrl: product.imageUrl ?? undefined,
-          unit: product.unit ?? undefined,
+          productId: displayProduct.id,
+          productName: displayProduct.name,
+          productSku: displayProduct.sku ?? undefined,
+          imageUrl: displayProduct.imageUrl ?? undefined,
+          unit: displayProduct.unit ?? undefined,
         });
       }
     }
@@ -77,10 +84,10 @@ export default function ProductDetail() {
     );
   }
 
-  const galleryRaw = product.galleryImages ? (typeof product.galleryImages === 'string' ? JSON.parse(product.galleryImages) : product.galleryImages) : [];
-  const gallery = [product.imageUrl, ...galleryRaw].filter(Boolean) as string[];
-  const attributes = product.attributes as Record<string, string> | null;
-  const tags = product.tags as string[] | null;
+  const galleryRaw = displayProduct?.galleryImages ? (typeof displayProduct.galleryImages === 'string' ? JSON.parse(displayProduct.galleryImages) : displayProduct.galleryImages) : [];
+  const gallery = [displayProduct?.imageUrl, ...galleryRaw].filter(Boolean) as string[];
+  const attributes = displayProduct?.attributes as Record<string, string> | null;
+  const tags = displayProduct?.tags as string[] | null;
 
   return (
     <SiteLayout>
@@ -135,34 +142,34 @@ export default function ProductDetail() {
             <div>
               {/* Status badges */}
               <div className="flex flex-wrap gap-2 mb-4">
-                {product.inStock ? (
+                {displayProduct?.inStock ? (
                   <span className="flex items-center gap-1 text-xs font-700 text-green-700 bg-green-50 px-2.5 py-1">
                     <CheckCircle size={12} /> In Stock
                   </span>
                 ) : (
                   <span className="text-xs font-700 text-amo-red bg-amo-red/10 px-2.5 py-1">Out of Stock</span>
                 )}
-                {product.featured && (
+                {displayProduct?.featured && (
                   <span className="text-xs font-700 text-amber-700 bg-amber-50 px-2.5 py-1">Featured</span>
                 )}
               </div>
 
               <h1 className="font-display font-800 text-charcoal text-3xl md:text-4xl uppercase tracking-tight leading-tight mb-3">
-                {product.name}
+                {displayProduct?.name}
               </h1>
 
               {/* Meta */}
               <div className="flex flex-wrap gap-4 text-sm text-dark-grey mb-5">
-                {product.sku && (
+                {displayProduct?.sku && (
                   <div className="flex items-center gap-1.5">
                     <Tag size={13} className="text-amo-red" />
-                    <span>SKU: <span className="font-600 text-charcoal">{product.sku}</span></span>
+                    <span>SKU: <span className="font-600 text-charcoal">{displayProduct.sku}</span></span>
                   </div>
                 )}
-                {product.unit && (
+                {displayProduct?.unit && (
                   <div className="flex items-center gap-1.5">
                     <Layers size={13} className="text-amo-red" />
-                    <span>Unit: <span className="font-600 text-charcoal">{product.unit}</span></span>
+                    <span>Unit: <span className="font-600 text-charcoal">{displayProduct.unit}</span></span>
                   </div>
                 )}
               </div>
@@ -176,7 +183,7 @@ export default function ProductDetail() {
                       onClick={() => setShowVariants(!showVariants)}
                       className="w-full flex items-center justify-between px-4 py-3 bg-white border border-border text-charcoal text-sm font-500 hover:border-charcoal transition-colors"
                     >
-                      <span className="line-clamp-1">{product.name}</span>
+                      <span className="line-clamp-1">{displayProduct?.name}</span>
                       <ChevronDown size={16} className={`transition-transform ${showVariants ? 'rotate-180' : ''}`} />
                     </button>
                     {showVariants && (
@@ -185,11 +192,12 @@ export default function ProductDetail() {
                           <button
                             key={variant.id}
                             onClick={() => {
-                              navigate(`/product/${variant.slug}`);
+                              setSelectedVariantId(variant.id);
                               setShowVariants(false);
+                              setActiveImage(0);
                             }}
                             className={`w-full text-left px-4 py-3 text-sm hover:bg-light-grey transition-colors border-b border-border last:border-0 ${
-                              variant.id === product.id ? 'bg-amo-red/10 text-amo-red font-600' : 'text-charcoal'
+                              variant.id === (selectedVariantId ?? product?.id) ? 'bg-amo-red/10 text-amo-red font-600' : 'text-charcoal'
                             }`}
                           >
                             {variant.name}
@@ -202,20 +210,20 @@ export default function ProductDetail() {
               )}
 
               {/* Short Description */}
-              {product.shortDescription && (
+              {displayProduct?.shortDescription && (
                 <p className="text-dark-grey leading-relaxed mb-6 border-l-2 border-amo-red pl-4">
-                  {product.shortDescription}
+                  {displayProduct.shortDescription}
                 </p>
               )}
 
               {/* Price */}
-              {(product.price || product.priceMin) && (
+              {(displayProduct?.price || displayProduct?.priceMin) && (
                 <div className="mb-6">
                   <div className="font-display font-800 text-charcoal text-2xl">
-                    {product.priceMin && product.priceMax
-                      ? `R${product.priceMin} – R${product.priceMax}`
-                      : product.price
-                      ? `R${product.price}`
+                    {displayProduct.priceMin && displayProduct.priceMax
+                      ? `R${displayProduct.priceMin} – R${displayProduct.priceMax}`
+                      : displayProduct.price
+                      ? `R${displayProduct.price}`
                       : ""}
                   </div>
                   <div className="text-xs text-dark-grey mt-1">Price excludes VAT. Contact us for bulk pricing.</div>
@@ -241,11 +249,11 @@ export default function ProductDetail() {
                 </div>
                 <button
                   onClick={handleAddToQuote}
-                  disabled={!product.inStock}
+                  disabled={!displayProduct?.inStock}
                   className={`flex-1 flex items-center justify-center gap-2 py-3 font-display font-700 text-sm uppercase tracking-wide transition-colors ${
                     added
                       ? "bg-charcoal text-white hover:bg-charcoal-light"
-                      : product.inStock
+                      : displayProduct?.inStock
                       ? "bg-amo-red text-white hover:bg-amo-red-dark"
                       : "bg-light-grey text-mid-grey cursor-not-allowed"
                   }`}
