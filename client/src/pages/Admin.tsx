@@ -5,10 +5,10 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Package, FileText, BarChart3, Upload, Plus, Edit2, Trash2,
   Eye, CheckCircle, Clock, Search, X, AlertCircle, LogOut, Menu,
-  ChevronDown, ChevronUp, Download, RefreshCw, Settings
+  ChevronDown, ChevronUp, Download, RefreshCw, Settings, Inbox, TrendingDown, AlertTriangle
 } from "lucide-react";
 
-type AdminTab = "overview" | "products" | "quotes" | "import" | "categories";
+type AdminTab = "overview" | "products" | "quotes" | "import" | "categories" | "inventory";
 
 export default function Admin() {
   const [tab, setTab] = useState<AdminTab>("overview");
@@ -76,6 +76,7 @@ export default function Admin() {
             { id: "overview", label: "Overview", icon: BarChart3 },
             { id: "products", label: "Products", icon: Package },
             { id: "quotes", label: "Quote Requests", icon: FileText },
+            { id: "inventory", label: "Inventory", icon: Inbox },
             { id: "import", label: "CSV Import", icon: Upload },
             { id: "categories", label: "Categories", icon: Settings },
           ] as { id: AdminTab; label: string; icon: any }[]).map(({ id, label, icon: Icon }) => (
@@ -123,6 +124,7 @@ export default function Admin() {
           {tab === "overview" && <OverviewTab />}
           {tab === "products" && <ProductsTab />}
           {tab === "quotes" && <QuotesTab />}
+          {tab === "inventory" && <InventoryTab />}
           {tab === "import" && <ImportTab />}
           {tab === "categories" && <CategoriesTab />}
         </div>
@@ -202,8 +204,10 @@ function ProductsTab() {
   const { data: products, isLoading, refetch } = trpc.products.list.useQuery({ search: search || undefined });
   const { data: categories } = trpc.categories.list.useQuery({});
   const { data: brands } = trpc.brands.list.useQuery();
+  const { data: inventoryMap } = trpc.inventory.getStats.useQuery();
   const deleteProduct = trpc.admin.deleteProduct.useMutation({ onSuccess: () => refetch() });
   const togglePublished = trpc.admin.toggleProductPublished.useMutation({ onSuccess: () => refetch() });
+  const initInventory = trpc.inventory.initialize.useMutation();
 
   return (
     <div>
@@ -238,6 +242,7 @@ function ProductsTab() {
                 <th className="text-left px-4 py-3 font-700 text-charcoal text-xs uppercase tracking-wide">SKU</th>
                 <th className="text-left px-4 py-3 font-700 text-charcoal text-xs uppercase tracking-wide">Category</th>
                 <th className="text-left px-4 py-3 font-700 text-charcoal text-xs uppercase tracking-wide">Status</th>
+                <th className="text-left px-4 py-3 font-700 text-charcoal text-xs uppercase tracking-wide">Stock</th>
                 <th className="text-right px-4 py-3 font-700 text-charcoal text-xs uppercase tracking-wide">Actions</th>
               </tr>
             </thead>
@@ -287,6 +292,9 @@ function ProductsTab() {
                         </span>
                         {!p.inStock && <span className="text-xs px-2 py-0.5 font-700 bg-amo-red/10 text-amo-red">Out of Stock</span>}
                       </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-xs px-2 py-0.5 font-700 bg-green-50 text-green-700">In Stock</span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
@@ -607,6 +615,200 @@ function CategoriesTab() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Inventory Tab ────────────────────────────────────────────────────────────
+function InventoryTab() {
+  const { data: stats } = trpc.inventory.getStats.useQuery();
+  const { data: lowStock } = trpc.inventory.getLowStock.useQuery();
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [editingInventory, setEditingInventory] = useState<any>(null);
+  
+  const updateQuantityMutation = trpc.inventory.updateQuantity.useMutation();
+  const updateThresholdMutation = trpc.inventory.updateThreshold.useMutation();
+  const utils = trpc.useUtils();
+  
+  const handleUpdateQuantity = async (productId: number, newQuantity: number, action: string) => {
+    try {
+      await updateQuantityMutation.mutateAsync({
+        productId,
+        newQuantity,
+        action: action as any,
+        reason: `Manual adjustment by admin`,
+      });
+      await utils.inventory.getLowStock.invalidate();
+      await utils.inventory.getStats.invalidate();
+    } catch (error) {
+      console.error("Failed to update inventory:", error);
+    }
+  };
+  
+  const handleUpdateThreshold = async (productId: number, threshold: number, reorderQty: number) => {
+    try {
+      await updateThresholdMutation.mutateAsync({
+        productId,
+        threshold,
+        reorderQuantity: reorderQty,
+      });
+      await utils.inventory.getLowStock.invalidate();
+    } catch (error) {
+      console.error("Failed to update threshold:", error);
+    }
+  };
+  
+  return (
+    <div>
+      <h1 className="font-display font-800 text-charcoal text-2xl lg:text-3xl uppercase tracking-tight mb-6">Inventory Management</h1>
+      
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5 mb-6 lg:mb-8">
+        {[
+          { label: "Total Products", value: stats?.totalProducts ?? "—", icon: Package, color: "bg-blue-50 text-blue-600" },
+          { label: "With Inventory", value: stats?.productsWithInventory ?? "—", icon: Inbox, color: "bg-green-50 text-green-600" },
+          { label: "Low Stock", value: stats?.lowStockCount ?? "—", icon: AlertTriangle, color: "bg-amber-50 text-amber-600" },
+          { label: "Out of Stock", value: stats?.outOfStockCount ?? "—", icon: TrendingDown, color: "bg-amo-red/10 text-amo-red" },
+        ].map(({ label, value, icon: Icon, color }) => (
+          <div key={label} className="bg-white border border-border p-4 lg:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className={`w-10 h-10 flex items-center justify-center ${color}`}>
+                <Icon size={18} />
+              </div>
+            </div>
+            <div className="font-display font-800 text-charcoal text-2xl lg:text-3xl">{value}</div>
+            <div className="text-dark-grey text-xs lg:text-sm mt-1">{label}</div>
+          </div>
+        ))}
+      </div>
+      
+      {/* Low Stock Alert */}
+      {lowStock && lowStock.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 p-4 lg:p-5 mb-6 rounded-lg">
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <div className="font-600 text-amber-900 mb-2">Low Stock Alert</div>
+              <div className="text-sm text-amber-800">{lowStock.length} product(s) are below reorder threshold</div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Low Stock Products Table */}
+      <div className="bg-white border border-border overflow-hidden">
+        <div className="px-4 lg:px-5 py-4 border-b border-border">
+          <h2 className="font-display font-700 text-charcoal text-base lg:text-lg uppercase tracking-tight">Low Stock Products</h2>
+        </div>
+        <div className="divide-y divide-border overflow-x-auto">
+          {!lowStock || lowStock.length === 0 ? (
+            <div className="p-6 lg:p-8 text-center text-dark-grey text-sm">All products are above reorder threshold.</div>
+          ) : (
+            <div className="min-w-full">
+              <table className="w-full text-sm">
+                <thead className="bg-off-white border-b border-border">
+                  <tr>
+                    <th className="px-4 lg:px-5 py-3 text-left font-600 text-charcoal">Product</th>
+                    <th className="px-4 lg:px-5 py-3 text-left font-600 text-charcoal">Current Stock</th>
+                    <th className="px-4 lg:px-5 py-3 text-left font-600 text-charcoal">Threshold</th>
+                    <th className="px-4 lg:px-5 py-3 text-left font-600 text-charcoal">Status</th>
+                    <th className="px-4 lg:px-5 py-3 text-left font-600 text-charcoal">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lowStock.map((inv: any) => (
+                    <tr key={inv.id} className="hover:bg-off-white/50 transition-colors">
+                      <td className="px-4 lg:px-5 py-3 font-600 text-charcoal truncate">{inv.product?.name}</td>
+                      <td className="px-4 lg:px-5 py-3 text-charcoal font-600">{inv.quantity}</td>
+                      <td className="px-4 lg:px-5 py-3 text-dark-grey">{inv.reorderThreshold}</td>
+                      <td className="px-4 lg:px-5 py-3">
+                        <span className={`text-xs px-2 py-1 rounded font-600 ${
+                          inv.quantity === 0 ? "bg-amo-red/10 text-amo-red" : "bg-amber-50 text-amber-700"
+                        }`}>
+                          {inv.quantity === 0 ? "Out of Stock" : "Low Stock"}
+                        </span>
+                      </td>
+                      <td className="px-4 lg:px-5 py-3">
+                        <button
+                          onClick={() => setEditingInventory(inv)}
+                          className="text-amo-red hover:text-amo-red/80 text-xs font-600 uppercase transition-colors"
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {/* Edit Inventory Modal */}
+      {editingInventory && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display font-700 text-charcoal text-lg">Edit Inventory</h3>
+              <button onClick={() => setEditingInventory(null)} className="text-dark-grey hover:text-charcoal">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-600 text-charcoal mb-2">Product</label>
+                <div className="text-dark-grey text-sm">{editingInventory.product?.name}</div>
+              </div>
+              <div>
+                <label className="block text-sm font-600 text-charcoal mb-2">Current Quantity</label>
+                <input
+                  type="number"
+                  value={editingInventory.quantity}
+                  onChange={(e) => setEditingInventory({ ...editingInventory, quantity: parseInt(e.target.value) })}
+                  className="w-full px-3 py-2 border border-border rounded text-charcoal"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-600 text-charcoal mb-2">Reorder Threshold</label>
+                <input
+                  type="number"
+                  value={editingInventory.reorderThreshold}
+                  onChange={(e) => setEditingInventory({ ...editingInventory, reorderThreshold: parseInt(e.target.value) })}
+                  className="w-full px-3 py-2 border border-border rounded text-charcoal"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-600 text-charcoal mb-2">Reorder Quantity</label>
+                <input
+                  type="number"
+                  value={editingInventory.reorderQuantity}
+                  onChange={(e) => setEditingInventory({ ...editingInventory, reorderQuantity: parseInt(e.target.value) })}
+                  className="w-full px-3 py-2 border border-border rounded text-charcoal"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => {
+                    handleUpdateQuantity(editingInventory.productId, editingInventory.quantity, "adjusted");
+                    handleUpdateThreshold(editingInventory.productId, editingInventory.reorderThreshold, editingInventory.reorderQuantity);
+                    setEditingInventory(null);
+                  }}
+                  className="flex-1 bg-amo-red text-white px-4 py-2 rounded font-600 hover:bg-amo-red/90 transition-colors"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => setEditingInventory(null)}
+                  className="flex-1 border border-border text-charcoal px-4 py-2 rounded font-600 hover:bg-off-white transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

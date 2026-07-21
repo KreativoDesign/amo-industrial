@@ -101,3 +101,32 @@ export const quoteItems = mysqlTable("quote_items", {
 
 export type QuoteItem = typeof quoteItems.$inferSelect;
 export type InsertQuoteItem = typeof quoteItems.$inferInsert;
+
+export const inventory = mysqlTable("inventory", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull().unique(),
+  quantity: int("quantity").default(0).notNull(),
+  reorderThreshold: int("reorderThreshold").default(10).notNull(),
+  reorderQuantity: int("reorderQuantity").default(50).notNull(),
+  lastRestockedAt: timestamp("lastRestockedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Inventory = typeof inventory.$inferSelect;
+export type InsertInventory = typeof inventory.$inferInsert;
+
+export const inventoryHistory = mysqlTable("inventory_history", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  action: mysqlEnum("action", ["added", "removed", "adjusted", "reordered"]).notNull(),
+  quantityChanged: int("quantityChanged").notNull(),
+  previousQuantity: int("previousQuantity").notNull(),
+  newQuantity: int("newQuantity").notNull(),
+  reason: text("reason"),
+  adminId: int("adminId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type InventoryHistory = typeof inventoryHistory.$inferSelect;
+export type InsertInventoryHistory = typeof inventoryHistory.$inferInsert;

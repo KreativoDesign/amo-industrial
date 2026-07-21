@@ -1,6 +1,6 @@
 import { eq, like, and, or, isNull, desc, asc, sql, isNotNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, products, categories, brands, quoteRequests, quoteItems } from "../drizzle/schema";
+import { InsertUser, users, products, categories, brands, quoteRequests, quoteItems, inventory, inventoryHistory, Inventory, InsertInventory, InventoryHistory, InsertInventoryHistory } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -306,5 +306,138 @@ export async function getAdminStats() {
     totalQuotes: Number(quoteCount?.count ?? 0),
     pendingQuotes: Number(pendingCount?.count ?? 0),
     totalCategories: Number(catCount?.count ?? 0),
+  };
+}
+
+
+// ── Inventory Management ──────────────────────────────────────────────────────
+export async function getInventoryByProductId(productId: number): Promise<Inventory | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(inventory).where(eq(inventory.productId, productId)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function initializeInventory(productId: number, initialQuantity: number = 0): Promise<Inventory> {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  
+  // Check if inventory already exists
+  const existing = await getInventoryByProductId(productId);
+  if (existing) return existing;
+  
+  // Create new inventory record
+  await db.insert(inventory).values({
+    productId,
+    quantity: initialQuantity,
+    reorderThreshold: 10,
+    reorderQuantity: 50,
+  });
+  
+  const result = await db.select().from(inventory).where(eq(inventory.productId, productId)).limit(1);
+  return result[0]!;
+}
+
+export async function updateInventoryQuantity(
+  productId: number,
+  newQuantity: number,
+  action: "added" | "removed" | "adjusted" | "reordered",
+  reason?: string,
+  adminId?: number
+): Promise<Inventory> {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  
+  const inv = await getInventoryByProductId(productId);
+  if (!inv) throw new Error(`Inventory not found for product ${productId}`);
+  
+  const previousQuantity = inv.quantity;
+  const quantityChanged = newQuantity - previousQuantity;
+  
+  // Update inventory quantity
+  await db.update(inventory)
+    .set({ quantity: newQuantity, lastRestockedAt: new Date() })
+    .where(eq(inventory.productId, productId));
+  
+  // Record history
+  await db.insert(inventoryHistory).values({
+    productId,
+    action,
+    quantityChanged,
+    previousQuantity,
+    newQuantity,
+    reason: reason ?? null,
+    adminId: adminId ?? null,
+  });
+  
+  const updated = await getInventoryByProductId(productId);
+  return updated!;
+}
+
+export async function updateReorderThreshold(productId: number, threshold: number, reorderQuantity: number): Promise<Inventory> {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  
+  await db.update(inventory)
+    .set({ reorderThreshold: threshold, reorderQuantity })
+    .where(eq(inventory.productId, productId));
+  
+  const updated = await getInventoryByProductId(productId);
+  return updated!;
+}
+
+export async function getInventoryHistory(productId: number, limit: number = 50): Promise<InventoryHistory[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(inventoryHistory)
+    .where(eq(inventoryHistory.productId, productId))
+    .orderBy(desc(inventoryHistory.createdAt))
+    .limit(limit);
+}
+
+export async function getLowStockProducts(threshold?: number): Promise<(Inventory & { product: typeof products.$inferSelect })[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const query = db.select().from(inventory)
+    .innerJoin(products, eq(inventory.productId, products.id))
+    .where(threshold !== undefined 
+      ? and(isNotNull(products.imageUrl), sql`${products.imageUrl} != ''`)
+      : and(
+          sql`${inventory.quantity} <= ${inventory.reorderThreshold}`,
+          isNotNull(products.imageUrl),
+          sql`${products.imageUrl} != ''`
+        )
+    );
+  
+  const results = await query;
+  return results.map(r => ({ ...r.inventory, product: r.products }));
+}
+
+export async function getInventoryStats(): Promise<{
+  totalProducts: number;
+  productsWithInventory: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+  totalQuantity: number;
+}> {
+  const db = await getDb();
+  if (!db) {
+    return { totalProducts: 0, productsWithInventory: 0, lowStockCount: 0, outOfStockCount: 0, totalQuantity: 0 };
+  }
+  
+  const [prodCount] = await db.select({ count: sql<number>`count(*)` }).from(products).where(and(isNotNull(products.imageUrl), sql`${products.imageUrl} != ''`));
+  const [invCount] = await db.select({ count: sql<number>`count(*)` }).from(inventory);
+  const [lowStockCount] = await db.select({ count: sql<number>`count(*)` }).from(inventory).where(sql`${inventory.quantity} <= ${inventory.reorderThreshold}`);
+  const [outOfStockCount] = await db.select({ count: sql<number>`count(*)` }).from(inventory).where(eq(inventory.quantity, 0));
+  const [totalQty] = await db.select({ total: sql<number>`sum(${inventory.quantity})` }).from(inventory);
+  
+  return {
+    totalProducts: Number(prodCount?.count ?? 0),
+    productsWithInventory: Number(invCount?.count ?? 0),
+    lowStockCount: Number(lowStockCount?.count ?? 0),
+    outOfStockCount: Number(outOfStockCount?.count ?? 0),
+    totalQuantity: Number(totalQty?.total ?? 0),
   };
 }

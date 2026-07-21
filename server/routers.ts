@@ -12,6 +12,7 @@ import {
   getProducts, getProductBySlug, getProductById, createProduct, updateProduct, deleteProduct, toggleProductPublished,
   createQuoteRequest, getQuoteRequests, getQuoteItems, updateQuoteStatus,
   getAdminStats,
+  getInventoryByProductId, initializeInventory, updateInventoryQuantity, updateReorderThreshold, getInventoryHistory, getLowStockProducts, getInventoryStats,
 } from "./db";
 
 // ── Admin guard ───────────────────────────────────────────────────────────────
@@ -501,6 +502,64 @@ export const appRouter = router({
         }
 
         return { created, updated, skipped, errors, total: rows.length };
+      }),
+  }),
+
+  // ── Inventory Management ───────────────────────────────────────────────────
+  inventory: router({
+    getByProductId: adminProcedure
+      .input(z.object({ productId: z.number() }))
+      .query(async ({ input }) => {
+        return getInventoryByProductId(input.productId);
+      }),
+    
+    initialize: adminProcedure
+      .input(z.object({ productId: z.number(), initialQuantity: z.number().default(0) }))
+      .mutation(async ({ input }) => {
+        return initializeInventory(input.productId, input.initialQuantity);
+      }),
+    
+    updateQuantity: adminProcedure
+      .input(z.object({
+        productId: z.number(),
+        newQuantity: z.number(),
+        action: z.enum(["added", "removed", "adjusted", "reordered"]),
+        reason: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return updateInventoryQuantity(
+          input.productId,
+          input.newQuantity,
+          input.action,
+          input.reason,
+          ctx.user?.id
+        );
+      }),
+    
+    updateThreshold: adminProcedure
+      .input(z.object({
+        productId: z.number(),
+        threshold: z.number(),
+        reorderQuantity: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        return updateReorderThreshold(input.productId, input.threshold, input.reorderQuantity);
+      }),
+    
+    getHistory: adminProcedure
+      .input(z.object({ productId: z.number(), limit: z.number().default(50) }))
+      .query(async ({ input }) => {
+        return getInventoryHistory(input.productId, input.limit);
+      }),
+    
+    getLowStock: adminProcedure
+      .query(async () => {
+        return getLowStockProducts();
+      }),
+    
+    getStats: adminProcedure
+      .query(async () => {
+        return getInventoryStats();
       }),
   }),
 });
