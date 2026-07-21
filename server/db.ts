@@ -153,7 +153,7 @@ export async function getProducts(opts: {
     .limit(opts.limit ?? 200);
 
   if (opts.offset) (query as any).offset(opts.offset);
-  return query;
+  return await query;
 }
 
 export async function getProductBySlug(slug: string) {
