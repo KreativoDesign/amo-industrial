@@ -79,15 +79,7 @@ export default function Header() {
         <div className="container flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-charcoal flex items-center justify-center">
-                <span className="text-amo-red font-display font-900 text-lg leading-none">AMO</span>
-              </div>
-              <div className="hidden sm:block">
-                <div className="font-display font-800 text-charcoal text-xl leading-none tracking-tight uppercase">AMO Industrial</div>
-                <div className="text-[10px] text-dark-grey tracking-widest uppercase">Industrial Supply</div>
-              </div>
-            </div>
+            <img src="/manus-storage/AMO-industrial-logo_51cd6bed.png" alt="AMO Industrial" className="h-12 md:h-14 w-auto" />
           </Link>
 
           {/* Desktop Nav */}
