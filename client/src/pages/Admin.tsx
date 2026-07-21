@@ -57,8 +57,8 @@ export default function Admin() {
 
       {/* Sidebar */}
       <aside className={`${
-        sidebarOpen ? "block" : "hidden"
-      } lg:block w-full lg:w-64 bg-charcoal flex-shrink-0 flex flex-col fixed lg:static top-16 left-0 right-0 bottom-0 z-40 lg:z-auto overflow-y-auto lg:overflow-y-visible`}>
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+      } lg:translate-x-0 w-full lg:w-64 bg-charcoal flex-shrink-0 flex flex-col fixed lg:static top-16 left-0 right-0 bottom-0 z-40 lg:z-auto overflow-y-auto lg:overflow-y-visible transition-transform duration-300 ease-out`}>
         <div className="hidden lg:block p-5 border-b border-white/10">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-amo-red flex items-center justify-center">
@@ -71,7 +71,7 @@ export default function Admin() {
           </div>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-4 space-y-1.5">
           {([
             { id: "overview", label: "Overview", icon: BarChart3 },
             { id: "products", label: "Products", icon: Package },
@@ -85,24 +85,25 @@ export default function Admin() {
                 setTab(id);
                 setSidebarOpen(false);
               }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-600 transition-colors ${
+              aria-current={tab === id ? "page" : undefined}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-600 transition-all duration-200 ease-out rounded-lg ${
                 tab === id
-                  ? "bg-amo-red text-white"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
+                  ? "bg-amo-red text-white shadow-lg shadow-amo-red/20"
+                  : "text-white/60 hover:text-white hover:bg-white/8"
               }`}
             >
-              <Icon size={16} />
+              <Icon size={18} />
               <span className="truncate">{label}</span>
             </button>
           ))}
         </nav>
 
-        <div className="p-3 border-t border-white/10 mt-auto">
-          <div className="px-3 py-2 text-xs text-white/40 truncate">
-            Logged in as <span className="text-white/70 truncate">{user?.name || user?.email}</span>
+        <div className="p-4 border-t border-white/10 mt-auto space-y-2">
+          <div className="px-4 py-2 text-xs text-white/40 truncate">
+            Logged in as <span className="text-white/70 font-600 truncate">{user?.name || user?.email}</span>
           </div>
-          <Link href="/" className="flex items-center gap-2 px-3 py-2 text-sm text-white/60 hover:text-white transition-colors">
-            <Eye size={14} /> View Site
+          <Link href="/" className="flex items-center gap-2 px-4 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200 ease-out rounded-lg">
+            <Eye size={16} /> View Site
           </Link>
         </div>
       </aside>
@@ -110,8 +111,9 @@ export default function Admin() {
       {/* Overlay for mobile sidebar */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden animate-in fade-in duration-200 ease-out"
           onClick={() => setSidebarOpen(false)}
+          role="presentation"
         />
       )}
 
