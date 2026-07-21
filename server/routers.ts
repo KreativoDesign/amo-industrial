@@ -100,6 +100,29 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return getProductBySlug(input.slug);
       }),
+    getVariants: publicProcedure
+      .input(z.object({ productId: z.number() }))
+      .query(async ({ input }) => {
+        const product = await getProductById(input.productId);
+        if (!product) return [];
+        const variantPatterns = [
+          /\s*[-–]\s*\d+(?:\.\d+)?(?:\s*(?:mm|cm|m|inch|"|'|x))?$/i,
+          /\s*\(.*(?:mm|cm|m|inch|"|'|x).*\)$/i,
+        ];
+        let baseName = product.name;
+        for (const pattern of variantPatterns) {
+          baseName = baseName.replace(pattern, "").trim();
+        }
+        const allProducts = await getProducts({ published: true });
+        const variants = allProducts.filter(p => {
+          let pBaseName = p.name;
+          for (const pattern of variantPatterns) {
+            pBaseName = pBaseName.replace(pattern, "").trim();
+          }
+          return pBaseName === baseName && p.imageUrl && p.imageUrl.trim() !== '';
+        }).sort((a, b) => a.name.localeCompare(b.name));
+        return variants;
+      }),
   }),
 
   // ── Quotes ──────────────────────────────────────────────────────────────────

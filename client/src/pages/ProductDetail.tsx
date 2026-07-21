@@ -1,20 +1,26 @@
 import { useState } from "react";
-import { Link, useParams } from "wouter";
+import { Link, useParams, useLocation } from "wouter";
 import SiteLayout from "@/components/SiteLayout";
 import { trpc } from "@/lib/trpc";
 import { useQuote } from "@/contexts/QuoteContext";
 import {
   Package, ShoppingCart, CheckCircle, ArrowRight, ChevronRight,
-  Tag, Layers, Building2, Info, Plus, Minus
+  Tag, Layers, Building2, Info, Plus, Minus, ChevronDown
 } from "lucide-react";
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const [, navigate] = useLocation();
   const [qty, setQty] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
+  const [showVariants, setShowVariants] = useState(false);
   const { addItem, hasItem, updateQuantity, items } = useQuote();
 
   const { data: product, isLoading } = trpc.products.getBySlug.useQuery({ slug });
+  const { data: variants } = trpc.products.getVariants.useQuery(
+    { productId: product?.id ?? 0 },
+    { enabled: !!product?.id }
+  );
   const { data: related } = trpc.products.list.useQuery(
     { categoryId: product?.categoryId ?? undefined, limit: 4, published: true },
     { enabled: !!product?.categoryId }
@@ -160,6 +166,40 @@ export default function ProductDetail() {
                   </div>
                 )}
               </div>
+
+              {/* Variant Selector */}
+              {variants && variants.length > 1 && (
+                <div className="mb-6">
+                  <label className="block text-xs font-700 text-charcoal uppercase tracking-wide mb-2">Select Variant</label>
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowVariants(!showVariants)}
+                      className="w-full flex items-center justify-between px-4 py-3 bg-white border border-border text-charcoal text-sm font-500 hover:border-charcoal transition-colors"
+                    >
+                      <span className="line-clamp-1">{product.name}</span>
+                      <ChevronDown size={16} className={`transition-transform ${showVariants ? 'rotate-180' : ''}`} />
+                    </button>
+                    {showVariants && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border shadow-lg z-10 max-h-64 overflow-y-auto">
+                        {variants.map(variant => (
+                          <button
+                            key={variant.id}
+                            onClick={() => {
+                              navigate(`/product/${variant.slug}`);
+                              setShowVariants(false);
+                            }}
+                            className={`w-full text-left px-4 py-3 text-sm hover:bg-light-grey transition-colors border-b border-border last:border-0 ${
+                              variant.id === product.id ? 'bg-amo-red/10 text-amo-red font-600' : 'text-charcoal'
+                            }`}
+                          >
+                            {variant.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Short Description */}
               {product.shortDescription && (

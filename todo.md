@@ -193,3 +193,12 @@
 - [x] Verify all option variants now display the main product image
 - [x] Alpen F4 FORTE and all variant groups now have consistent images
 - [x] All 11 vitest tests pass
+
+
+## Phase 27: Product Variant Selector ✅ COMPLETE
+- [x] Examine ProductDetail page structure and variant data
+- [x] Create getVariants tRPC procedure to fetch product variants
+- [x] Implement variant selector dropdown with smooth switching
+- [x] Add variant switching logic with URL navigation
+- [x] Highlight current variant in dropdown
+- [x] All 11 vitest tests pass
