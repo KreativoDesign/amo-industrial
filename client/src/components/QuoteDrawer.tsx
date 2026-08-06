@@ -1,9 +1,26 @@
-import { X, Minus, Plus, Trash2, ArrowRight, ShoppingCart } from "lucide-react";
+import { X, Minus, Plus, Trash2, ArrowRight, ShoppingCart, Download, FileText } from "lucide-react";
 import { useQuote } from "@/contexts/QuoteContext";
 import { Link } from "wouter";
+import { exportQuoteAsCSV, exportQuoteAsPDF } from "@/lib/quoteExport";
 
 export default function QuoteDrawer() {
   const { items, count, isDrawerOpen, closeDrawer, removeItem, updateQuantity } = useQuote();
+
+  const handleDownloadCSV = () => {
+    const exportDate = new Date().toLocaleString();
+    exportQuoteAsCSV({
+      items,
+      exportDate,
+    });
+  };
+
+  const handleDownloadPDF = () => {
+    const exportDate = new Date().toLocaleString();
+    exportQuoteAsPDF({
+      items,
+      exportDate,
+    });
+  };
 
   return (
     <>
@@ -109,10 +126,30 @@ export default function QuoteDrawer() {
 
         {/* Footer Actions */}
         {items.length > 0 && (
-          <div className="border-t border-border p-6 bg-off-white">
-            <div className="text-xs text-dark-grey mb-4">
+          <div className="border-t border-border p-6 bg-off-white space-y-3">
+            <div className="text-xs text-dark-grey">
               Submit your quote request and our team will respond within 24 hours.
             </div>
+
+            {/* Download Options */}
+            <div className="bg-white border border-border rounded p-3 space-y-2">
+              <div className="text-xs font-600 text-charcoal uppercase tracking-wide mb-2">Download Quote</div>
+              <button
+                onClick={handleDownloadCSV}
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-white border border-border text-charcoal text-sm font-500 hover:bg-light-grey transition-colors rounded"
+              >
+                <Download size={14} />
+                Download as CSV
+              </button>
+              <button
+                onClick={handleDownloadPDF}
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-white border border-border text-charcoal text-sm font-500 hover:bg-light-grey transition-colors rounded"
+              >
+                <FileText size={14} />
+                Download as PDF
+              </button>
+            </div>
+
             <Link
               href="/request-quote"
               onClick={closeDrawer}
@@ -122,7 +159,7 @@ export default function QuoteDrawer() {
             </Link>
             <button
               onClick={closeDrawer}
-              className="mt-3 w-full py-2.5 text-sm text-dark-grey hover:text-charcoal transition-colors font-500 text-center"
+              className="w-full py-2.5 text-sm text-dark-grey hover:text-charcoal transition-colors font-500 text-center"
             >
               Continue Browsing
             </button>

@@ -264,3 +264,12 @@
 - [x] Ensure only products with actual images are displayed
 - [x] Test all product display pages
 - [x] Verify no placeholder images appear on frontend
+
+## Phase 36: Bulk Quote Download Feature ✅ COMPLETE
+- [x] Create CSV export utility function
+- [x] Create PDF export utility function
+- [x] Add download buttons to quote drawer
+- [x] Format quote data with product details, quantities, SKUs, and pricing
+- [x] Test CSV export functionality
+- [x] Test PDF export functionality
+- [x] Verify downloads work on all devices
