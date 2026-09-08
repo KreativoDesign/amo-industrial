@@ -125,32 +125,32 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="container relative z-10 py-20">
+        <div className="container relative z-10 py-14 sm:py-20">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-amo-red/20 border border-amo-red/30 text-amo-red px-3 py-1.5 text-xs font-700 uppercase tracking-widest mb-6">
+            <div className="inline-flex items-center gap-2 bg-amo-red/20 border border-amo-red/30 text-amo-red px-3 py-1.5 text-xs font-700 uppercase tracking-widest mb-5 sm:mb-6">
               <span className="w-1.5 h-1.5 bg-amo-red rounded-full" />
               Gqeberha's Industrial Supply Partner
             </div>
-            <h1 className="font-display font-900 text-white text-5xl md:text-6xl lg:text-7xl uppercase leading-[0.95] tracking-tight mb-6">
+            <h1 className="max-w-[22rem] sm:max-w-2xl font-display font-900 text-white text-[2.75rem] sm:text-5xl md:text-6xl lg:text-7xl uppercase leading-[0.98] tracking-tight mb-5 sm:mb-6">
               Your Direct Source for{" "}
               <span className="text-amo-red">Industrial</span>{" "}
               &amp;{" "}
               <span className="text-amo-red">Commercial</span>{" "}
               Supplies
             </h1>
-            <p className="text-white/70 text-lg leading-relaxed mb-8 max-w-xl">
+            <p className="max-w-[22rem] sm:max-w-xl text-white/70 text-base sm:text-lg leading-relaxed mb-7 sm:mb-8">
               Shop premium-grade consumables, safety gear, and professional equipment. Delivered from our Gqeberha depot, straight to your site.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/shop" className="btn-primary text-base px-8 py-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
+              <Link href="/shop" className="btn-primary text-base px-7 sm:px-8 py-4 justify-center">
                 Browse Products <ArrowRight size={18} />
               </Link>
-              <Link href="/request-quote" className="btn-outline-white text-base px-8 py-4">
+              <Link href="/request-quote" className="btn-outline-white text-base px-7 sm:px-8 py-4 justify-center">
                 Request a Quote
               </Link>
             </div>
             {/* Trust signals */}
-            <div className="mt-10 flex flex-wrap gap-6 text-sm text-white/50">
+            <div className="mt-8 sm:mt-10 flex flex-wrap gap-x-5 gap-y-3 text-sm text-white/50">
               <div className="flex items-center gap-2">
                 <CheckCircle size={14} className="text-amo-red" />
                 <span>Local Gqeberha Depot</span>
