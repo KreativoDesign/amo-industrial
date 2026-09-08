@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useQuote } from "@/contexts/QuoteContext";
+import { useEffect, useRef } from "react";
 
 const CATEGORY_HIGHLIGHTS = [
   { name: "Hand Tools", slug: "hand-tools", icon: Wrench, desc: "Professional-grade hand tools for every trade" },
@@ -53,6 +54,34 @@ const SECTORS = [
 ];
 
 export default function Home() {
+  const heroBackgroundRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (reducedMotion.matches) return;
+
+    let animationFrame = 0;
+    const updateParallax = () => {
+      animationFrame = 0;
+      const heroBackground = heroBackgroundRef.current;
+      const hero = heroBackground?.parentElement;
+      if (!hero) return;
+
+      const offset = Math.max(-28, Math.min(28, -hero.getBoundingClientRect().top * 0.08));
+      heroBackground.style.transform = `translate3d(0, ${offset}px, 0) scale(1.06)`;
+    };
+    const handleScroll = () => {
+      if (!animationFrame) animationFrame = window.requestAnimationFrame(updateParallax);
+    };
+
+    updateParallax();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    };
+  }, []);
+
   const { data: featuredProducts } = trpc.products.list.useQuery({
     featured: true,
     limit: 8,
@@ -64,11 +93,16 @@ export default function Home() {
       {/* ── Hero Section ─────────────────────────────────────────────────── */}
       <section className="relative bg-charcoal overflow-hidden min-h-[580px] flex items-center">
         {/* Industrial warehouse background with a restrained readability overlay */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/manus-storage/amo-industrial-hero-background-updated_1052b391.png')" }}
-          aria-hidden="true"
-        />
+        <div ref={heroBackgroundRef} className="absolute -inset-6 will-change-transform" aria-hidden="true">
+          <picture className="block h-full w-full">
+            <source media="(max-width: 767px)" srcSet="/manus-storage/amo-industrial-hero-background-mobile_9554a692.png" />
+            <img
+              src="/manus-storage/amo-industrial-hero-background-updated_1052b391.png"
+              alt=""
+              className="block h-full w-full object-cover object-center"
+            />
+          </picture>
+        </div>
         <div className="absolute inset-0 bg-charcoal/70" aria-hidden="true" />
         {/* Background pattern */}
         <div className="absolute inset-0 industrial-overlay opacity-30" />
