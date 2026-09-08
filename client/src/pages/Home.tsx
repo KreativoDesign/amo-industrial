@@ -66,7 +66,7 @@ export default function Home() {
         {/* Industrial warehouse background with a restrained readability overlay */}
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/manus-storage/amo-industrial-hero-background_7b96417d.jpg')" }}
+          style={{ backgroundImage: "url('/manus-storage/amo-industrial-hero-background-updated_1052b391.png')" }}
           aria-hidden="true"
         />
         <div className="absolute inset-0 bg-charcoal/70" aria-hidden="true" />
