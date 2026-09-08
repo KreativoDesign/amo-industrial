@@ -164,22 +164,25 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {CATEGORY_HIGHLIGHTS.map(({ name, slug, icon: Icon, desc }) => (
-              <Link
+              <div
                 key={slug}
-                href={`/category/${slug}`}
                 className="product-card group flex gap-5 p-6"
               >
-                <div className="w-16 h-16 flex items-center justify-center flex-shrink-0">
+                <Link
+                  href={`/category/${slug}`}
+                  aria-label={`Browse ${name} products`}
+                  className="w-16 h-16 flex items-center justify-center flex-shrink-0 cursor-pointer"
+                >
                   <Icon size={40} strokeWidth={1.8} className="text-charcoal group-hover:text-amo-red transition-colors duration-200" />
-                </div>
-                <div>
+                </Link>
+                <Link href={`/category/${slug}`} className="min-w-0">
                   <div className="font-display font-700 text-charcoal text-lg uppercase tracking-tight group-hover:text-amo-red transition-colors">{name}</div>
                   <div className="text-dark-grey text-sm mt-1 leading-relaxed">{desc}</div>
                   <div className="flex items-center gap-1 text-amo-red text-xs font-700 uppercase tracking-wide mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
                     Browse Products <ArrowRight size={12} />
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </div>
             ))}
           </div>
         </div>
