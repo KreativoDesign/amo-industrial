@@ -63,6 +63,13 @@ export default function Home() {
     <SiteLayout>
       {/* ── Hero Section ─────────────────────────────────────────────────── */}
       <section className="relative bg-charcoal overflow-hidden min-h-[580px] flex items-center">
+        {/* Industrial warehouse background with a restrained readability overlay */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('/manus-storage/amo-industrial-hero-background_7b96417d.jpg')" }}
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 bg-charcoal/70" aria-hidden="true" />
         {/* Background pattern */}
         <div className="absolute inset-0 industrial-overlay opacity-30" />
         {/* Red accent bar */}
