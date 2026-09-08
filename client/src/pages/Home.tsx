@@ -169,8 +169,8 @@ export default function Home() {
                 href={`/category/${slug}`}
                 className="product-card group flex gap-5 p-6"
               >
-                <div className="w-14 h-14 bg-charcoal group-hover:bg-amo-red flex items-center justify-center flex-shrink-0 transition-colors duration-200">
-                  <Icon size={24} className="text-white" />
+                <div className="w-16 h-16 flex items-center justify-center flex-shrink-0">
+                  <Icon size={40} strokeWidth={1.8} className="text-charcoal group-hover:text-amo-red transition-colors duration-200" />
                 </div>
                 <div>
                   <div className="font-display font-700 text-charcoal text-lg uppercase tracking-tight group-hover:text-amo-red transition-colors">{name}</div>
