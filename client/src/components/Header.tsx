@@ -79,9 +79,7 @@ export default function Header() {
         <div className="container flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
-            <span className="font-display font-900 text-xl md:text-2xl tracking-tight whitespace-nowrap transition-transform duration-300 ease-out group-hover:scale-105">
-              <span className="text-charcoal">AMO</span><span className="text-amo-red"> INDUSTRIAL</span>
-            </span>
+            <img src="/manus-storage/AMO-industrial-logo-transparent_1bdc9735.png" alt="AMO Industrial" className="h-12 md:h-14 w-auto max-w-[180px] object-contain transition-transform duration-300 ease-out group-hover:scale-105" />
           </Link>
 
           {/* Desktop Nav */}

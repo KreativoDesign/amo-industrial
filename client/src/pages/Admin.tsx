@@ -42,9 +42,7 @@ export default function Admin() {
       {/* Mobile Header */}
       <div className="lg:hidden bg-charcoal border-b border-white/10 flex items-center justify-between p-4 sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-amo-red flex items-center justify-center">
-            <span className="font-display font-900 text-white text-xs">AMO</span>
-          </div>
+          <img src="/manus-storage/AMO-industrial-logo-transparent_1bdc9735.png" alt="AMO Industrial" className="h-8 w-auto max-w-[120px] object-contain" />
           <div className="font-display font-700 text-white text-sm uppercase tracking-tight">Admin</div>
         </div>
         <button
@@ -61,9 +59,7 @@ export default function Admin() {
       } lg:translate-x-0 w-full lg:w-64 bg-charcoal flex-shrink-0 flex flex-col fixed lg:static top-16 left-0 right-0 bottom-0 z-40 lg:z-auto overflow-y-auto lg:overflow-y-visible transition-transform duration-300 ease-out`}>
         <div className="hidden lg:block p-5 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-amo-red flex items-center justify-center">
-              <span className="font-display font-900 text-white text-xs">AMO</span>
-            </div>
+            <img src="/manus-storage/AMO-industrial-logo-transparent_1bdc9735.png" alt="AMO Industrial" className="h-8 w-auto max-w-[120px] object-contain" />
             <div>
               <div className="font-display font-700 text-white text-sm uppercase tracking-tight">Admin Panel</div>
               <div className="text-white/40 text-xs">AMO Industrial</div>
