@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Menu, X, ShoppingCart, Phone, Mail, ChevronDown, Package, Settings, LogOut } from "lucide-react";
 import { useQuote } from "@/contexts/QuoteContext";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
+import { startLogin } from "@/const";
 
 const CATEGORIES = [
   { name: "Accessories", slug: "accessories", icon: "🔧" },
@@ -79,7 +79,7 @@ export default function Header() {
         <div className="container flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
-            <img src="/manus-storage/AMO-industrial-logo_51cd6bed.png" alt="AMO Industrial" className="h-12 md:h-14 w-auto transition-all duration-300 ease-out group-hover:scale-105 group-hover:drop-shadow-lg cursor-pointer" />
+            <img src="/manus-storage/AMO-industrial-logo-transparent_1bdc9735.png" alt="AMO Industrial" className="h-12 md:h-14 w-auto max-w-[180px] object-contain transition-transform duration-300 ease-out group-hover:scale-105" />
           </Link>
 
           {/* Desktop Nav */}
@@ -150,12 +150,12 @@ export default function Header() {
                 </button>
               </>
             ) : (
-              <a
-                href={getLoginUrl()}
+              <button
+                onClick={() => startLogin()}
                 className="flex items-center gap-1.5 px-4 py-2 font-display font-700 text-sm uppercase tracking-wide text-charcoal hover:text-amo-red transition-colors"
               >
                 Login
-              </a>
+              </button>
             )}
           </div>
 
@@ -229,12 +229,12 @@ export default function Header() {
                   Logout
                 </button>
               ) : (
-                <a
-                  href={getLoginUrl()}
+                <button
+                  onClick={() => startLogin()}
                   className="py-2.5 font-display font-700 text-sm uppercase tracking-wide text-charcoal hover:text-amo-red transition-colors flex items-center gap-1.5"
                 >
                   Login
-                </a>
+                </button>
               )}
               <div className="mt-3 pt-3 border-t border-border flex flex-col gap-2 text-sm text-dark-grey">
                 <a href="tel:+27828952245" className="flex items-center gap-2 hover:text-amo-red transition-colors">

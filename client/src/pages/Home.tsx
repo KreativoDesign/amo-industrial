@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useQuote } from "@/contexts/QuoteContext";
+import { useEffect, useRef } from "react";
 
 const CATEGORY_HIGHLIGHTS = [
   { name: "Hand Tools", slug: "hand-tools", icon: Wrench, desc: "Professional-grade hand tools for every trade" },
@@ -53,6 +54,34 @@ const SECTORS = [
 ];
 
 export default function Home() {
+  const heroBackgroundRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (reducedMotion.matches) return;
+
+    let animationFrame = 0;
+    const updateParallax = () => {
+      animationFrame = 0;
+      const heroBackground = heroBackgroundRef.current;
+      const hero = heroBackground?.parentElement;
+      if (!hero) return;
+
+      const offset = Math.max(-28, Math.min(28, -hero.getBoundingClientRect().top * 0.08));
+      heroBackground.style.transform = `translate3d(0, ${offset}px, 0) scale(1.06)`;
+    };
+    const handleScroll = () => {
+      if (!animationFrame) animationFrame = window.requestAnimationFrame(updateParallax);
+    };
+
+    updateParallax();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    };
+  }, []);
+
   const { data: featuredProducts } = trpc.products.list.useQuery({
     featured: true,
     limit: 8,
@@ -63,6 +92,18 @@ export default function Home() {
     <SiteLayout>
       {/* ── Hero Section ─────────────────────────────────────────────────── */}
       <section className="relative bg-charcoal overflow-hidden min-h-[580px] flex items-center">
+        {/* Industrial warehouse background with a restrained readability overlay */}
+        <div ref={heroBackgroundRef} className="absolute -inset-6 will-change-transform" aria-hidden="true">
+          <picture className="block h-full w-full">
+            <source media="(max-width: 767px)" srcSet="/manus-storage/amo-industrial-hero-background-mobile_9554a692.png" />
+            <img
+              src="/manus-storage/amo-industrial-hero-background-updated_1052b391.png"
+              alt=""
+              className="block h-full w-full object-cover object-center"
+            />
+          </picture>
+        </div>
+        <div className="absolute inset-0 bg-charcoal/70" aria-hidden="true" />
         {/* Background pattern */}
         <div className="absolute inset-0 industrial-overlay opacity-30" />
         {/* Red accent bar */}
@@ -84,32 +125,32 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="container relative z-10 py-20">
+        <div className="container relative z-10 py-14 sm:py-20">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-amo-red/20 border border-amo-red/30 text-amo-red px-3 py-1.5 text-xs font-700 uppercase tracking-widest mb-6">
+            <div className="inline-flex items-center gap-2 bg-amo-red/20 border border-amo-red/30 text-amo-red px-3 py-1.5 text-xs font-700 uppercase tracking-widest mb-5 sm:mb-6">
               <span className="w-1.5 h-1.5 bg-amo-red rounded-full" />
               Gqeberha's Industrial Supply Partner
             </div>
-            <h1 className="font-display font-900 text-white text-5xl md:text-6xl lg:text-7xl uppercase leading-[0.95] tracking-tight mb-6">
+            <h1 className="max-w-[22rem] sm:max-w-2xl font-display font-900 text-white text-[2.75rem] sm:text-5xl md:text-6xl lg:text-7xl uppercase leading-[0.98] tracking-tight mb-5 sm:mb-6">
               Your Direct Source for{" "}
               <span className="text-amo-red">Industrial</span>{" "}
               &amp;{" "}
               <span className="text-amo-red">Commercial</span>{" "}
               Supplies
             </h1>
-            <p className="text-white/70 text-lg leading-relaxed mb-8 max-w-xl">
+            <p className="max-w-[22rem] sm:max-w-xl text-white/70 text-base sm:text-lg leading-relaxed mb-7 sm:mb-8">
               Shop premium-grade consumables, safety gear, and professional equipment. Delivered from our Gqeberha depot, straight to your site.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/shop" className="btn-primary text-base px-8 py-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
+              <Link href="/shop" className="btn-primary text-base px-7 sm:px-8 py-4 justify-center">
                 Browse Products <ArrowRight size={18} />
               </Link>
-              <Link href="/request-quote" className="btn-outline-white text-base px-8 py-4">
+              <Link href="/request-quote" className="btn-outline-white text-base px-7 sm:px-8 py-4 justify-center">
                 Request a Quote
               </Link>
             </div>
             {/* Trust signals */}
-            <div className="mt-10 flex flex-wrap gap-6 text-sm text-white/50">
+            <div className="mt-8 sm:mt-10 flex flex-wrap gap-x-5 gap-y-3 text-sm text-white/50">
               <div className="flex items-center gap-2">
                 <CheckCircle size={14} className="text-amo-red" />
                 <span>Local Gqeberha Depot</span>
@@ -164,22 +205,25 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {CATEGORY_HIGHLIGHTS.map(({ name, slug, icon: Icon, desc }) => (
-              <Link
+              <div
                 key={slug}
-                href={`/category/${slug}`}
                 className="product-card group flex gap-5 p-6"
               >
-                <div className="w-14 h-14 bg-charcoal group-hover:bg-amo-red flex items-center justify-center flex-shrink-0 transition-colors duration-200">
-                  <Icon size={24} className="text-white" />
-                </div>
-                <div>
+                <Link
+                  href={`/category/${slug}`}
+                  aria-label={`Browse ${name} products`}
+                  className="w-16 h-16 flex items-center justify-center flex-shrink-0 cursor-pointer"
+                >
+                  <Icon size={40} strokeWidth={1.8} className="text-charcoal group-hover:text-amo-red transition-colors duration-200" />
+                </Link>
+                <Link href={`/category/${slug}`} className="min-w-0">
                   <div className="font-display font-700 text-charcoal text-lg uppercase tracking-tight group-hover:text-amo-red transition-colors">{name}</div>
                   <div className="text-dark-grey text-sm mt-1 leading-relaxed">{desc}</div>
                   <div className="flex items-center gap-1 text-amo-red text-xs font-700 uppercase tracking-wide mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
                     Browse Products <ArrowRight size={12} />
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </div>
             ))}
           </div>
         </div>

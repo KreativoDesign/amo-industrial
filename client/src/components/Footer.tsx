@@ -33,7 +33,7 @@ export default function Footer() {
         {/* Brand Column */}
         <div className="flex flex-col items-center md:items-start text-center md:text-left">
           <Link href="/" className="mb-5 inline-block group">
-            <img src="/manus-storage/AMO-industrial-logo_51cd6bed.png" alt="AMO Industrial" className="h-12 w-auto transition-all duration-300 ease-out group-hover:scale-105 group-hover:drop-shadow-lg" />
+            <img src="/manus-storage/AMO-industrial-logo-transparent_1bdc9735.png" alt="AMO Industrial" className="h-12 w-auto max-w-[190px] object-contain transition-transform duration-300 ease-out group-hover:scale-105" />
           </Link>
           <p className="text-white/60 text-sm leading-relaxed mb-5">
             Your trusted local Gqeberha partner for specialist industrial and commercial supplies. Quality products, competitive pricing, fast delivery.
